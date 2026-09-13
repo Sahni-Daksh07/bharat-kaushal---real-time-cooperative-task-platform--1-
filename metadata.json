@@ -1,0 +1,6 @@
+{
+  "name": "Bharat Kaushal - Real-Time Cooperative Task Platform",
+  "description": "Cooperative digital labour and local services ecosystem with real-time WebSocket dispatch, multi-portal collaboration, transparent pricing, and welfare integration.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
