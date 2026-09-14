@@ -508,8 +508,8 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
         </div>
       </section>
 
-      {/* 2. Key Metrics Grid (Desktop Mockup #4) */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 dashboard-card" data-dashboard-card="true">
+      {/* 2. Key Metrics Grid (Auto-adjusts from single column on small mobile to 4 columns on desktop) */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 dashboard-card" data-dashboard-card="true">
         {/* Metric 1: Today's Earnings */}
         <div className="bk-card p-4 sm:p-5 flex items-start justify-between gap-3">
           <div className="space-y-1">

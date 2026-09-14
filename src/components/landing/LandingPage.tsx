@@ -35,6 +35,7 @@ interface LandingPageProps {
   onOpenAuth: (role?: UserRole) => void;
   onOpenCustomerBooking: () => void;
   onOpenWorkerMarketplace: () => void;
+  showNavigation?: boolean;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -44,85 +45,89 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenAuth,
   onOpenCustomerBooking,
   onOpenWorkerMarketplace,
+  showNavigation = false,
 }) => {
   const t = (key: string, fallback?: string) => getTranslation(lang, key, fallback);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 flex flex-col">
-      {/* 1. Header Navigation Bar */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <BharatKaushalLogo size="md" inline={true} showTagline={false} />
-          </div>
-
-          {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-600">
-            <a href="#hero" className="text-blue-600 hover:text-blue-700 transition-colors">
-              {t('Home', 'Home')}
-            </a>
-            <button
-              onClick={onOpenWorkerMarketplace}
-              className="hover:text-blue-600 transition-colors cursor-pointer"
-            >
-              {t('Find_Work', 'Find Work')}
-            </button>
-            <button
-              onClick={onOpenCustomerBooking}
-              className="hover:text-blue-600 transition-colors cursor-pointer"
-            >
-              {t('Book_a_Service', 'Book a Service')}
-            </button>
-            <a href="#cooperatives" className="hover:text-blue-600 transition-colors">
-              {t('Cooperatives', 'Cooperatives')}
-            </a>
-            <a href="#impact" className="hover:text-blue-600 transition-colors">
-              {t('Impact', 'Impact')}
-            </a>
-            <a href="#how-it-works" className="hover:text-blue-600 transition-colors">
-              {t('How_It_Works', 'How It Works')}
-            </a>
-          </div>
-
-          {/* Right Action Tools */}
-          <div className="flex items-center gap-3">
-            {/* Language Switcher */}
-            <div className="relative">
-              <select
-                aria-label="Language selector"
-                value={lang}
-                onChange={(e) => onSelectLang(e.target.value as SupportedLanguage)}
-                className="h-9 bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium rounded-xl pl-3 pr-7 hover:border-slate-300 focus:outline-none cursor-pointer appearance-none"
-              >
-                {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.nativeName}
-                  </option>
-                ))}
-              </select>
-              <Globe size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 flex flex-col w-full overflow-x-hidden">
+      {/* 1. Optional Standalone Header Navigation Bar */}
+      {showNavigation && (
+        <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <BharatKaushalLogo size="md" inline={true} showTagline={false} />
             </div>
 
-            {/* Login Button */}
-            <button
-              onClick={() => onOpenAuth('CUSTOMER')}
-              className="h-9 px-4 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-slate-100 transition-all border border-slate-200"
-            >
-              {t('Login', 'Login')}
-            </button>
+            {/* Desktop Nav Links */}
+            <div className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-600">
+              <a href="#hero" className="text-blue-600 hover:text-blue-700 transition-colors">
+                {t('Home', 'Home')}
+              </a>
+              <button
+                onClick={onOpenWorkerMarketplace}
+                className="hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                {t('Find_Work', 'Find Work')}
+              </button>
+              <button
+                onClick={onOpenCustomerBooking}
+                className="hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                {t('Book_a_Service', 'Book a Service')}
+              </button>
+              <a href="#cooperatives" className="hover:text-blue-600 transition-colors">
+                {t('Cooperatives', 'Cooperatives')}
+              </a>
+              <a href="#impact" className="hover:text-blue-600 transition-colors">
+                {t('Impact', 'Impact')}
+              </a>
+              <a href="#how-it-works" className="hover:text-blue-600 transition-colors">
+                {t('How_It_Works', 'How It Works')}
+              </a>
+            </div>
 
-            {/* Get Started Primary CTA */}
-            <button
-              onClick={() => onOpenAuth('WORKER')}
-              className="h-9 px-4 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all flex items-center gap-1.5"
-            >
-              <span>{t('Get_Started', 'Get Started')}</span>
-              <ArrowRight size={13} />
-            </button>
+            {/* Right Action Tools */}
+            <div className="flex items-center gap-3">
+              {/* Language Switcher */}
+              <div className="relative">
+                <select
+                  aria-label="Language selector"
+                  value={lang}
+                  onChange={(e) => onSelectLang(e.target.value as SupportedLanguage)}
+                  className="h-9 bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium rounded-xl pl-3 pr-7 hover:border-slate-300 focus:outline-none cursor-pointer appearance-none"
+                >
+                  {SUPPORTED_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.nativeName}
+                    </option>
+                  ))}
+                </select>
+                <Globe size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+
+              {/* Login Button */}
+              <button
+                onClick={() => onOpenAuth('CUSTOMER')}
+                className="h-9 px-4 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-slate-100 transition-all border border-slate-200"
+              >
+                {t('Login', 'Login')}
+              </button>
+
+              {/* Get Started Primary CTA */}
+              <button
+                onClick={() => onOpenAuth('WORKER')}
+                className="h-9 px-4 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all flex items-center gap-1.5"
+              >
+                <span>{t('Get_Started', 'Get Started')}</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
+
 
       {/* 2. Hero Section */}
       <header id="hero" className="relative overflow-hidden pt-8 pb-16 lg:py-20 bg-gradient-to-b from-white via-blue-50/30 to-slate-50 border-b border-slate-200/80">
