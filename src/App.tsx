@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
 import { RealtimeProvider, useRealtime } from './context/RealtimeContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Header, UserRole } from './components/common/Header';
 import { CustomerPortal } from './components/customer/CustomerPortal';
 import { WorkerPortal } from './components/worker/WorkerPortal';
@@ -84,6 +84,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 }
 
 function MainAppContent() {
+  const { isAccountLoggedIn } = useAuth();
   const [currentView, setCurrentView] = useState<'LANDING' | 'PORTAL'>('LANDING');
   const [currentRole, setCurrentRole] = useState<UserRole>('CUSTOMER');
   const [lang, setLang] = useState<SupportedLanguage>('en');
@@ -91,6 +92,28 @@ function MainAppContent() {
   const [isUnifiedAuthOpen, setIsUnifiedAuthOpen] = useState(false);
   const [unifiedAuthRole, setUnifiedAuthRole] = useState<UserRole>('CUSTOMER');
   const { toasts, dismissToast } = useRealtime();
+
+  // Listen for navigation home events (e.g. on logout)
+  useEffect(() => {
+    const handleGoHome = () => {
+      setCurrentView('LANDING');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    window.addEventListener('NAVIGATE_HOME', handleGoHome);
+    window.addEventListener('ACCOUNT_LOGGED_OUT', handleGoHome);
+    return () => {
+      window.removeEventListener('NAVIGATE_HOME', handleGoHome);
+      window.removeEventListener('ACCOUNT_LOGGED_OUT', handleGoHome);
+    };
+  }, []);
+
+  // If no account is logged in, automatically keep view on LANDING
+  useEffect(() => {
+    if (!isAccountLoggedIn && currentView !== 'LANDING') {
+      setCurrentView('LANDING');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [isAccountLoggedIn, currentView]);
 
   const isPricingDatasetAllowed = ['SOCIETY_ADMIN', 'FEDERATION_ADMIN', 'SUPER_ADMIN'].includes(currentRole);
 
@@ -165,23 +188,25 @@ function MainAppContent() {
         ))}
       </div>
 
-      {/* Global Header */}
-      <Header
-        currentRole={currentRole}
-        onSelectRole={(role) => {
-          setCurrentRole(role);
-          setCurrentView('PORTAL');
-        }}
-        lang={lang}
-        onSelectLang={setLang}
-        onOpenBenchmark={handleOpenBenchmark}
-        currentView={currentView}
-        onNavigateHome={() => setCurrentView('LANDING')}
-        onOpenUnifiedAuth={(role) => {
-          setUnifiedAuthRole(role || currentRole);
-          setIsUnifiedAuthOpen(true);
-        }}
-      />
+      {/* Global Header - ONLY visible when an account is logged in */}
+      {isAccountLoggedIn && (
+        <Header
+          currentRole={currentRole}
+          onSelectRole={(role) => {
+            setCurrentRole(role);
+            setCurrentView('PORTAL');
+          }}
+          lang={lang}
+          onSelectLang={setLang}
+          onOpenBenchmark={handleOpenBenchmark}
+          currentView={currentView}
+          onNavigateHome={() => setCurrentView('LANDING')}
+          onOpenUnifiedAuth={(role) => {
+            setUnifiedAuthRole(role || currentRole);
+            setIsUnifiedAuthOpen(true);
+          }}
+        />
+      )}
 
       {/* View Switcher: Landing Page vs Portal Views */}
       {currentView === 'LANDING' ? (
@@ -197,13 +222,24 @@ function MainAppContent() {
             setIsUnifiedAuthOpen(true);
           }}
           onOpenCustomerBooking={() => {
-            setCurrentRole('CUSTOMER');
-            setCurrentView('PORTAL');
+            if (isAccountLoggedIn) {
+              setCurrentRole('CUSTOMER');
+              setCurrentView('PORTAL');
+            } else {
+              setUnifiedAuthRole('CUSTOMER');
+              setIsUnifiedAuthOpen(true);
+            }
           }}
           onOpenWorkerMarketplace={() => {
-            setCurrentRole('WORKER');
-            setCurrentView('PORTAL');
+            if (isAccountLoggedIn) {
+              setCurrentRole('WORKER');
+              setCurrentView('PORTAL');
+            } else {
+              setUnifiedAuthRole('WORKER');
+              setIsUnifiedAuthOpen(true);
+            }
           }}
+          isAccountLoggedIn={isAccountLoggedIn}
         />
       ) : (
         /* Main Workspace Body */
@@ -249,15 +285,19 @@ function MainAppContent() {
       {/* Role-Specific Authentication Modals */}
       <AuthModalsContainer />
 
-      {/* Mobile Persistent Navigation Bar (< 640px) */}
-      <MobileNavigation
-        currentRole={currentRole}
-        onSelectRole={(role) => {
-          setCurrentRole(role);
-          setCurrentView('PORTAL');
-        }}
-        lang={lang}
-      />
+      {/* Mobile Persistent Navigation Bar (< 640px) - ONLY visible when logged in */}
+      {isAccountLoggedIn && (
+        <MobileNavigation
+          currentRole={currentRole}
+          onSelectRole={(role) => {
+            setCurrentRole(role);
+            setCurrentView('PORTAL');
+          }}
+          lang={lang}
+          onSelectLang={setLang}
+          onNavigateHome={() => setCurrentView('LANDING')}
+        />
+      )}
 
       {/* Unified Multi-Role Auth Experience Modal */}
       <UnifiedAuthExperience
@@ -266,9 +306,10 @@ function MainAppContent() {
         initialRole={unifiedAuthRole}
         lang={lang}
         onSelectLang={setLang}
-        onSuccess={() => {
+        onSuccess={(authenticatedRole) => {
           setIsUnifiedAuthOpen(false);
-          setCurrentRole(unifiedAuthRole);
+          const finalRole = authenticatedRole || unifiedAuthRole;
+          setCurrentRole(finalRole);
           setCurrentView('PORTAL');
         }}
       />

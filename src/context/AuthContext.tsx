@@ -60,12 +60,17 @@ interface AuthContextType {
   openAuthModal: (role: UserRole) => void;
   closeAuthModal: () => void;
 
+  // Global Auth State
+  isAccountLoggedIn: boolean;
+  logoutAll: () => void;
+
   // Available Seed Accounts Directory for easy benchmark & switching
   availableAccounts: {
     customers: CustomerProfile[];
     workers: WorkerProfile[];
     societyAdmins: SocietyAdminProfile[];
     federationAdmins: FederationAdminProfile[];
+    superAdminUser?: SuperAdminProfile | null;
     superAdmins: SuperAdminProfile[];
   };
   refreshAccounts: () => Promise<void>;
@@ -88,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return SEEDED_CUSTOMERS[0];
   });
   const [isCustomerAuthenticated, setIsCustomerAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('bk_auth_customer_logged_in') !== 'false';
+    return localStorage.getItem('bk_auth_customer_logged_in') === 'true';
   });
 
   // 2. Worker State
@@ -100,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return PRIMARY_DEMO_WORKER;
   });
   const [isWorkerAuthenticated, setIsWorkerAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('bk_auth_worker_logged_in') !== 'false';
+    return localStorage.getItem('bk_auth_worker_logged_in') === 'true';
   });
 
   // 3. Society Admin State
@@ -112,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return SEEDED_SOCIETY_ADMINS[0];
   });
   const [isSocietyAdminAuthenticated, setIsSocietyAdminAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('bk_auth_society_admin_logged_in') !== 'false';
+    return localStorage.getItem('bk_auth_society_admin_logged_in') === 'true';
   });
 
   // 4. Federation Admin State
@@ -124,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return SEEDED_FEDERATION_ADMINS[0];
   });
   const [isFederationAdminAuthenticated, setIsFederationAdminAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('bk_auth_federation_admin_logged_in') !== 'false';
+    return localStorage.getItem('bk_auth_federation_admin_logged_in') === 'true';
   });
 
   // 5. Super Admin State
@@ -136,7 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return SEEDED_SUPER_ADMINS[0];
   });
   const [isSuperAdminAuthenticated, setIsSuperAdminAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('bk_auth_super_admin_logged_in') !== 'false';
+    return localStorage.getItem('bk_auth_super_admin_logged_in') === 'true';
   });
 
   // Modal Control
@@ -166,6 +171,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     refreshAccounts();
   }, []);
+
+  const dispatchNavigateHome = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('NAVIGATE_HOME'));
+      window.dispatchEvent(new CustomEvent('ACCOUNT_LOGGED_OUT'));
+    }
+  };
+
+  const logoutAll = () => {
+    setIsCustomerAuthenticated(false);
+    setIsWorkerAuthenticated(false);
+    setIsSocietyAdminAuthenticated(false);
+    setIsFederationAdminAuthenticated(false);
+    setIsSuperAdminAuthenticated(false);
+    localStorage.setItem('bk_auth_customer_logged_in', 'false');
+    localStorage.setItem('bk_auth_worker_logged_in', 'false');
+    localStorage.setItem('bk_auth_society_admin_logged_in', 'false');
+    localStorage.setItem('bk_auth_federation_admin_logged_in', 'false');
+    localStorage.setItem('bk_auth_super_admin_logged_in', 'false');
+    localStorage.removeItem('bharat_kaushal_is_society_admin_auth');
+    localStorage.removeItem('bharat_kaushal_is_federation_admin_auth');
+    localStorage.removeItem('bharat_kaushal_is_super_admin_auth');
+    localStorage.removeItem('bharat_kaushal_active_role');
+    dispatchNavigateHome();
+  };
 
   // ----------------------------------------------------
   // 1. CUSTOMER AUTH FUNCTIONS
@@ -230,8 +260,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logoutCustomer = () => {
-    setIsCustomerAuthenticated(false);
-    localStorage.setItem('bk_auth_customer_logged_in', 'false');
+    logoutAll();
   };
 
   const switchCustomer = (customer: CustomerProfile) => {
@@ -354,8 +383,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logoutWorker = () => {
-    setIsWorkerAuthenticated(false);
-    localStorage.setItem('bk_auth_worker_logged_in', 'false');
+    logoutAll();
   };
 
   const switchWorker = (worker: WorkerProfile) => {
@@ -397,8 +425,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logoutSocietyAdmin = () => {
-    setIsSocietyAdminAuthenticated(false);
-    localStorage.setItem('bk_auth_society_admin_logged_in', 'false');
+    logoutAll();
   };
 
   const switchSocietyAdmin = (admin: SocietyAdminProfile) => {
@@ -440,8 +467,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logoutFederationAdmin = () => {
-    setIsFederationAdminAuthenticated(false);
-    localStorage.setItem('bk_auth_federation_admin_logged_in', 'false');
+    logoutAll();
   };
 
   const switchFederationAdmin = (officer: FederationAdminProfile) => {
@@ -548,8 +574,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logoutSuperAdmin = () => {
-    setIsSuperAdminAuthenticated(false);
-    localStorage.setItem('bk_auth_super_admin_logged_in', 'false');
+    logoutAll();
   };
 
   const switchSuperAdmin = (admin: SuperAdminProfile) => {
@@ -732,9 +757,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveAuthModal(null);
   };
 
+
+  const isAccountLoggedIn = Boolean(
+    isCustomerAuthenticated ||
+    isWorkerAuthenticated ||
+    isSocietyAdminAuthenticated ||
+    isFederationAdminAuthenticated ||
+    isSuperAdminAuthenticated
+  );
+
   return (
     <AuthContext.Provider
       value={{
+        isAccountLoggedIn,
+        logoutAll,
+
         customerUser,
         isCustomerAuthenticated,
         loginCustomer,

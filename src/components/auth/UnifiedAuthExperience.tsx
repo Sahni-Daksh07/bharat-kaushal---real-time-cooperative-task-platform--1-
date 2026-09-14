@@ -24,6 +24,7 @@ import {
   AlertCircle,
   Sparkles,
   Globe,
+  ChevronDown,
   Eye,
   EyeOff,
 } from 'lucide-react';
@@ -34,7 +35,7 @@ interface UnifiedAuthExperienceProps {
   initialRole?: UserRole;
   lang?: SupportedLanguage;
   onSelectLang?: (lang: SupportedLanguage) => void;
-  onSuccess?: () => void;
+  onSuccess?: (role?: UserRole) => void;
 }
 
 export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
@@ -155,7 +156,7 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
       if (res.success) {
         setFeedback({ type: 'success', message: res.message || 'Login successful! Redirecting...' });
         setTimeout(() => {
-          onSuccess?.();
+          onSuccess?.(selectedRole);
           onClose?.();
         }, 600);
       } else {
@@ -190,7 +191,7 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
       if (res.success) {
         setFeedback({ type: 'success', message: 'Citizen profile registered successfully! Logging you in...' });
         setTimeout(() => {
-          onSuccess?.();
+          onSuccess?.('CUSTOMER');
           onClose?.();
         }, 700);
       } else {
@@ -361,10 +362,23 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                 </button>
               </div>
 
-              {/* Language Indicator */}
-              <div className="flex items-center gap-1 text-xs text-slate-500">
-                <Globe size={13} />
-                <span>{lang === 'hi' ? 'हिंदी' : 'English'}</span>
+              {/* Workable Language Selector */}
+              <div className="relative flex items-center mr-8 sm:mr-10">
+                <Globe size={13} className="absolute left-2.5 text-blue-600 pointer-events-none" />
+                <select
+                  id="login-page-language-select"
+                  aria-label="Select Language"
+                  value={lang}
+                  onChange={(e) => onSelectLang?.(e.target.value as SupportedLanguage)}
+                  className="h-8 pl-7 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+                >
+                  {SUPPORTED_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.nativeName} ({l.name})
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={12} className="absolute right-2 text-slate-400 pointer-events-none" />
               </div>
             </div>
 
@@ -677,7 +691,7 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                     if (cust) switchCustomer(cust);
                     setFeedback({ type: 'success', message: 'Signed in with demo citizen account.' });
                     setTimeout(() => {
-                      onSuccess?.();
+                      onSuccess?.('CUSTOMER');
                       onClose?.();
                     }, 500);
                   }}

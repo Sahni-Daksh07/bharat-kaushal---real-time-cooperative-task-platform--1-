@@ -1,5 +1,6 @@
 import React from 'react';
 import { BharatKaushalLogo } from '../common/BharatKaushalLogo';
+import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 import { SupportedLanguage, SUPPORTED_LANGUAGES, getTranslation } from '../../utils/i18n';
 import {
@@ -35,6 +36,7 @@ interface LandingPageProps {
   onOpenAuth: (role?: UserRole) => void;
   onOpenCustomerBooking: () => void;
   onOpenWorkerMarketplace: () => void;
+  isAccountLoggedIn?: boolean;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -44,12 +46,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenAuth,
   onOpenCustomerBooking,
   onOpenWorkerMarketplace,
+  isAccountLoggedIn,
 }) => {
+  const auth = useAuth();
+  const isLoggedIn = isAccountLoggedIn !== undefined ? isAccountLoggedIn : (auth?.isAccountLoggedIn ?? false);
   const t = (key: string, fallback?: string) => getTranslation(lang, key, fallback);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 flex flex-col">
-      {/* 1. Header Navigation Bar */}
+      {/* 1. Header Navigation Bar - Appears ONLY when no account is logged in */}
+      {!isLoggedIn && (
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
@@ -123,6 +129,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </div>
       </nav>
+      )}
 
       {/* 2. Hero Section */}
       <header id="hero" className="relative overflow-hidden pt-8 pb-16 lg:py-20 bg-gradient-to-b from-white via-blue-50/30 to-slate-50 border-b border-slate-200/80">

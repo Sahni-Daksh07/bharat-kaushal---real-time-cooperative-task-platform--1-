@@ -349,6 +349,7 @@ export const SuperAdminPortal: React.FC = () => {
 
             {/* Logout / Lock Button */}
             <button
+              id="btn-superadmin-lock"
               onClick={() => logoutSuperAdmin()}
               title={t('Lock_Console___Sign_Out_of_Sov_ihq2s', `Lock Console & Sign Out of Sovereign System`)}
               className="h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 transition-colors flex items-center justify-center gap-1 px-2.5 shrink-0"

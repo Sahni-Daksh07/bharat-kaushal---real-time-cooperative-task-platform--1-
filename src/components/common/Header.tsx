@@ -70,6 +70,10 @@ export const Header: React.FC<HeaderProps> = ({
     openAuthModal,
     logoutCustomer,
     logoutWorker,
+    logoutSocietyAdmin,
+    logoutFederationAdmin,
+    logoutSuperAdmin,
+    logoutAll,
   } = useAuth();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -219,12 +223,40 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
+          {/* Language Selector in Customer Toggle Menu */}
+          <div className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+            <div className="flex items-center gap-3 text-slate-700">
+              <Globe size={16} className="text-blue-600" />
+              <span className="font-medium">{t('Language', 'Language')}</span>
+            </div>
+            <div className="relative">
+              <select
+                id="toggle-menu-customer-lang"
+                aria-label="Select Language"
+                value={lang}
+                onChange={(e) => {
+                  onSelectLang(e.target.value as SupportedLanguage);
+                }}
+                className="h-8 pl-2.5 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+              >
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.nativeName}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
           <button
+            id="btn-customer-logout"
             onClick={() => {
               setIsToggleMenuOpen(false);
               logoutCustomer();
+              onNavigateHome?.();
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left text-rose-600"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left text-rose-600 cursor-pointer"
           >
             <LogOut size={16} className="text-rose-500" />
             <span className="font-medium">{t('Logging_Out', 'Logging Out')}</span>
@@ -235,7 +267,7 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
           >
             <LifeBuoy size={16} className="text-slate-500" />
             <span className="font-medium">{t('Support', 'Support')}</span>
@@ -245,7 +277,7 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
           >
             <Headphones size={16} className="text-slate-500" />
             <span className="font-medium">{t('Customer_Care', 'Customer Care')}</span>
@@ -261,7 +293,7 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_PROFILE'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
           >
             <User size={16} className="text-slate-500" />
             <span className="font-medium">{t('Profile', 'Profile')}</span>
@@ -272,7 +304,7 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_ORDER_CARD'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
           >
             <ClipboardList size={16} className="text-slate-500" />
             <span className="font-medium">{t('Order_Card', 'Order Card')}</span>
@@ -283,18 +315,46 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_INCOME_HISTORY'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
           >
             <Wallet size={16} className="text-slate-500" />
             <span className="font-medium">{t('Income_History', 'Income History')}</span>
           </button>
 
+          {/* Language Selector in Worker Toggle Menu */}
+          <div className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+            <div className="flex items-center gap-3 text-slate-700">
+              <Globe size={16} className="text-blue-600" />
+              <span className="font-medium">{t('Language', 'Language')}</span>
+            </div>
+            <div className="relative">
+              <select
+                id="toggle-menu-worker-lang"
+                aria-label="Select Language"
+                value={lang}
+                onChange={(e) => {
+                  onSelectLang(e.target.value as SupportedLanguage);
+                }}
+                className="h-8 pl-2.5 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+              >
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.nativeName}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
           <button
+            id="btn-worker-logout"
             onClick={() => {
               setIsToggleMenuOpen(false);
               logoutWorker();
+              onNavigateHome?.();
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left text-rose-600"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left text-rose-600 cursor-pointer"
           >
             <LogOut size={16} className="text-rose-500" />
             <span className="font-medium">{t('Logging_Out', 'Logging Out')}</span>
@@ -305,10 +365,80 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
           >
             <LifeBuoy size={16} className="text-slate-500" />
             <span className="font-medium">{t('Support', 'Support')}</span>
+          </button>
+        </>
+      )}
+
+      {(currentRole === 'SOCIETY_ADMIN' || currentRole === 'FEDERATION_ADMIN' || currentRole === 'SUPER_ADMIN') && (
+        <>
+          <button
+            id="btn-toggle-menu-admin-account"
+            onClick={() => {
+              setIsToggleMenuOpen(false);
+              openAuthModal(currentRole);
+            }}
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+          >
+            <User size={16} className="text-slate-500" />
+            <span className="font-medium">Switch / Authorize Account</span>
+          </button>
+
+          {/* Pricing Dataset Button in Admin Toggle Menu */}
+          <button
+            id="btn-toggle-menu-dataset-benchmark"
+            onClick={() => {
+              setIsToggleMenuOpen(false);
+              onOpenBenchmark();
+            }}
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+          >
+            <Database size={16} className="text-emerald-600" />
+            <span className="font-medium text-emerald-800">{t('pricingDataset', 'Pricing Dataset (140)')}</span>
+          </button>
+
+          {/* Language Selector in Admin Toggle Menu */}
+          <div className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+            <div className="flex items-center gap-3 text-slate-700">
+              <Globe size={16} className="text-blue-600" />
+              <span className="font-medium">{t('Language', 'Language')}</span>
+            </div>
+            <div className="relative">
+              <select
+                id="toggle-menu-admin-lang"
+                aria-label="Select Language"
+                value={lang}
+                onChange={(e) => {
+                  onSelectLang(e.target.value as SupportedLanguage);
+                }}
+                className="h-8 pl-2.5 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+              >
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.nativeName}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          <button
+            id="btn-admin-logout"
+            onClick={() => {
+              setIsToggleMenuOpen(false);
+              if (currentRole === 'SOCIETY_ADMIN') logoutSocietyAdmin();
+              else if (currentRole === 'FEDERATION_ADMIN') logoutFederationAdmin();
+              else if (currentRole === 'SUPER_ADMIN') logoutSuperAdmin();
+              onNavigateHome?.();
+            }}
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left text-rose-600 cursor-pointer"
+          >
+            <LogOut size={16} className="text-rose-500" />
+            <span className="font-medium">{t('Logging_Out', 'Logging Out')}</span>
           </button>
         </>
       )}
@@ -391,7 +521,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white"></span>
               )}
             </button>
-            {(currentRole === 'CUSTOMER' || currentRole === 'WORKER') && (
               <div className="relative shrink-0 flex items-center">
                 <button
                   id="btn-mobile-toggle-menu"
@@ -401,7 +530,7 @@ export const Header: React.FC<HeaderProps> = ({
                     if (showNotifications) setShowNotifications(false);
                   }}
                   title={t('Menu', 'Menu')}
-                  className={`w-9 h-9 flex items-center justify-center text-slate-600 active:bg-slate-200 rounded-xl transition-colors shrink-0 ${
+                  className={`w-9 h-9 flex items-center justify-center text-slate-600 active:bg-slate-200 rounded-xl transition-colors shrink-0 cursor-pointer ${
                     isToggleMenuOpen ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 hover:bg-slate-200/80'
                   }`}
                 >
@@ -425,31 +554,16 @@ export const Header: React.FC<HeaderProps> = ({
                   </>
                 )}
               </div>
-            )}
           </div>
         </div>
 
         {/* Multi-role Navigation Tabs */}
         <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
-          {onNavigateHome && (
-            <button
-              id="nav-role-home"
-              onClick={onNavigateHome}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                currentView === 'LANDING'
-                  ? 'bg-blue-600 text-white shadow-xs font-bold'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              <span>{t('Home', 'Home')}</span>
-            </button>
-          )}
-
           <button
             id="nav-role-customer"
             onClick={() => onSelectRole('CUSTOMER')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
-              currentRole === 'CUSTOMER' && currentView !== 'LANDING'
+              currentRole === 'CUSTOMER'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
@@ -544,39 +658,6 @@ export const Header: React.FC<HeaderProps> = ({
             <ChevronDown size={13} className="text-slate-400 shrink-0" />
           </button>
 
-          {/* Dataset Benchmark Button - Restricted to Society Admin, Federation Admin, Super Admin */}
-          {['SOCIETY_ADMIN', 'FEDERATION_ADMIN', 'SUPER_ADMIN'].includes(currentRole) && (
-            <button
-              id="btn-open-dataset-benchmark"
-              onClick={onOpenBenchmark}
-              className="shrink-0 h-9 flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors"
-              title={t('Inspect_140_Indore_Services_Be_4034e', `Inspect 140 Indore Services Benchmark Dataset`)}
-            >
-              <Database size={13} className="shrink-0 text-emerald-700" />
-              <span className="hidden lg:inline whitespace-nowrap">{t('pricingDataset', 'Pricing Dataset (140)')}</span>
-              <span className="lg:hidden whitespace-nowrap">{t('data', 'Data')}</span>
-            </button>
-          )}
-
-          {/* Language Selector - Hidden for Customer and Worker */}
-          {currentRole !== 'CUSTOMER' && currentRole !== 'WORKER' && (
-            <div className="shrink-0 relative">
-              <select
-                id="language-select"
-                value={lang}
-                onChange={(e) => onSelectLang(e.target.value as SupportedLanguage)}
-                className="h-9 w-[96px] bg-slate-50 border border-slate-300 text-slate-800 text-xs font-medium rounded-xl pl-2.5 pr-7 cursor-pointer hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none truncate"
-              >
-                {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.nativeName}
-                  </option>
-                ))}
-              </select>
-              <Globe size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            </div>
-          )}
-
           {/* Desktop Action Tools Cluster: Reset, Notifications, Toggle Menu */}
           <div className="hidden md:flex items-center gap-1.5 shrink-0">
             {/* Desktop Reset Demo State Button */}
@@ -611,41 +692,39 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Desktop Toggle Menu Button */}
-            {(currentRole === 'CUSTOMER' || currentRole === 'WORKER') && (
-              <div className="relative shrink-0 flex items-center">
-                <button
-                  id="btn-desktop-toggle-menu"
-                  onClick={() => {
-                    const nextState = !isToggleMenuOpen;
-                    setIsToggleMenuOpen(nextState);
-                    if (showNotifications) setShowNotifications(false);
-                  }}
-                  title={t('Menu', 'Menu')}
-                  className={`w-9 h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 border rounded-xl transition-colors shrink-0 ${
-                    isToggleMenuOpen ? 'bg-slate-100 border-slate-300 text-slate-900' : 'border-slate-200/80'
-                  }`}
-                >
-                  <Menu size={18} />
-                </button>
+            <div className="relative shrink-0 flex items-center">
+              <button
+                id="btn-desktop-toggle-menu"
+                onClick={() => {
+                  const nextState = !isToggleMenuOpen;
+                  setIsToggleMenuOpen(nextState);
+                  if (showNotifications) setShowNotifications(false);
+                }}
+                title={t('Menu', 'Menu')}
+                className={`w-9 h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 border rounded-xl transition-colors shrink-0 cursor-pointer ${
+                  isToggleMenuOpen ? 'bg-slate-100 border-slate-300 text-slate-900' : 'border-slate-200/80'
+                }`}
+              >
+                <Menu size={18} />
+              </button>
 
-                {isToggleMenuOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40 bg-transparent"
-                      onClick={() => {
-                        setIsToggleMenuOpen(false);
-                      }}
-                    />
-                    <div
-                      ref={toggleMenuContainerRef}
-                      className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[85vh] overflow-y-auto"
-                    >
-                      {renderToggleMenuItems()}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+              {isToggleMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-transparent"
+                    onClick={() => {
+                      setIsToggleMenuOpen(false);
+                    }}
+                  />
+                  <div
+                    ref={toggleMenuContainerRef}
+                    className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[85vh] overflow-y-auto"
+                  >
+                    {renderToggleMenuItems()}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

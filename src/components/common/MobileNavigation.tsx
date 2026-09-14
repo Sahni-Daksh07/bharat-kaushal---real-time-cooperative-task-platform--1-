@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { UserRole } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
-import { SupportedLanguage, getTranslation } from '../../utils/i18n';
+import { SupportedLanguage, SUPPORTED_LANGUAGES, getTranslation } from '../../utils/i18n';
 import {
   Home,
   Briefcase,
@@ -24,26 +24,32 @@ import {
   PhoneCall,
   FileText,
   ChevronRight,
+  Globe,
+  ChevronDown,
 } from 'lucide-react';
 
 interface MobileNavigationProps {
   currentRole: UserRole;
   onSelectRole: (role: UserRole) => void;
   lang: SupportedLanguage;
+  onSelectLang?: (lang: SupportedLanguage) => void;
   activeTab?: string;
   onSelectTab?: (tab: string) => void;
   onOpenProfile?: () => void;
   onOpenHistory?: () => void;
+  onNavigateHome?: () => void;
 }
 
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   currentRole,
   onSelectRole,
   lang,
+  onSelectLang,
   activeTab = 'HOME',
   onSelectTab,
   onOpenProfile,
   onOpenHistory,
+  onNavigateHome,
 }) => {
   const {
     customerUser,
@@ -118,6 +124,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     else if (currentRole === 'SOCIETY_ADMIN') logoutSocietyAdmin();
     else if (currentRole === 'FEDERATION_ADMIN') logoutFederationAdmin();
     else if (currentRole === 'SUPER_ADMIN') logoutSuperAdmin();
+    onNavigateHome?.();
   };
 
   return (
@@ -438,6 +445,31 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
               </div>
 
               <div className="h-px bg-slate-100 my-2"></div>
+
+              {/* Language Selector */}
+              {onSelectLang && (
+                <div className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors">
+                  <div className="flex items-center gap-3 text-slate-700">
+                    <Globe size={16} className="text-blue-600" />
+                    <span className="font-medium text-xs">Language</span>
+                  </div>
+                  <div className="relative">
+                    <select
+                      aria-label="Change Language"
+                      value={lang}
+                      onChange={(e) => onSelectLang(e.target.value as SupportedLanguage)}
+                      className="h-8 pl-2.5 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none"
+                    >
+                      {SUPPORTED_LANGUAGES.map((l) => (
+                        <option key={l.code} value={l.code}>
+                          {l.nativeName}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown size={12} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={() => {
