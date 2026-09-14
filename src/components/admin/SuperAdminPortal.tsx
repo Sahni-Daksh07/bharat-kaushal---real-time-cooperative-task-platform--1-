@@ -328,11 +328,9 @@ export const SuperAdminPortal: React.FC = () => {
               </span>
             </button>
 
-            {/* Profile Dropdown / Switch */}
-            <button
-              onClick={() => openAuthModal('SUPER_ADMIN')}
-              title={t('Click_to_Switch_Officer_or_Man_97lx8', `Click to Switch Officer or Manage Credentials`)}
-              className="h-9 bg-slate-800 hover:bg-slate-750 px-2.5 sm:px-3 rounded-xl border border-slate-700 flex items-center gap-2 transition-colors cursor-pointer text-left shrink-0"
+            {/* Officer Designation Badge */}
+            <div
+              className="h-9 bg-slate-800 px-2.5 sm:px-3 rounded-xl border border-slate-700 flex items-center gap-2 text-left shrink-0"
             >
               <div className="text-right hidden sm:block">
                 <div className="font-bold text-white leading-tight truncate max-w-[130px]">
@@ -345,7 +343,7 @@ export const SuperAdminPortal: React.FC = () => {
               <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-xs shadow-xs shrink-0">
                 {getInitials(superAdminUser?.name)}
               </div>
-            </button>
+            </div>
 
             {/* Logout / Lock Button */}
             <button

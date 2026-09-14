@@ -147,18 +147,6 @@ export const FederationCommandPortal: React.FC<FederationCommandPortalProps> = (
             <Mail size={14} className="text-purple-400 shrink-0" />
             <span>{t('Email_j6ra3', `Email`)}</span>
           </button>
-          <button
-            id="btn-federation-portal-auth-trigger"
-            onClick={() => openAuthModal('FEDERATION_ADMIN')}
-            className={`col-span-2 sm:col-span-1 md:col-span-1 h-9 px-3.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md border whitespace-nowrap ${
-              isFederationAdminAuthenticated
-                ? 'bg-purple-950/80 text-purple-200 border-purple-700 hover:bg-purple-900'
-                : 'bg-purple-700 hover:bg-purple-600 text-white border-purple-600'
-            }`}
-          >
-            <Lock size={14} className="shrink-0" />
-            <span>{isFederationAdminAuthenticated ? 'Clearance Active' : 'Directorate 2FA'}</span>
-          </button>
         </div>
       </section>
 

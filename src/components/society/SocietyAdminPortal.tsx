@@ -133,19 +133,6 @@ export const SocietyAdminPortal: React.FC<SocietyAdminPortalProps> = ({ lang: _l
             <Mail size={14} className="text-blue-600 shrink-0" />
             <span>{t('Email_Settings_4kyfj', `Email Settings`)}</span>
           </button>
-
-          <button
-            id="btn-society-portal-auth-trigger"
-            onClick={() => openAuthModal('SOCIETY_ADMIN')}
-            className={`flex-1 sm:flex-initial h-9 px-3.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-2xs border whitespace-nowrap ${
-              isSocietyAdminAuthenticated
-                ? 'bg-blue-50 text-blue-800 border-blue-300 hover:bg-blue-100'
-                : 'bg-blue-700 hover:bg-blue-800 text-white border-blue-800'
-            }`}
-          >
-            <KeyRound size={14} className="shrink-0" />
-            <span>{isSocietyAdminAuthenticated ? 'Officer Session (Active)' : 'Officer Staff Login'}</span>
-          </button>
         </div>
       </section>
 

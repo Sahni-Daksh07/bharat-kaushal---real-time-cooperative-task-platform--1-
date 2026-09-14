@@ -466,19 +466,6 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({ lang }) => {
             <Mail size={14} className="text-blue-600 shrink-0" />
             <span className="whitespace-nowrap">{t('Email_Settings_b2rky', `Email Settings`)}</span>
           </button>
-
-          <button
-            id="btn-customer-portal-auth-trigger"
-            onClick={() => openAuthModal('CUSTOMER')}
-            className={`w-full sm:w-auto h-9 px-3.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-2xs ${
-              isCustomerAuthenticated
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
-          >
-            {isCustomerAuthenticated ? <UserCheck size={14} className="shrink-0" /> : <LogIn size={14} className="shrink-0" />}
-            <span className="whitespace-nowrap">{isCustomerAuthenticated ? t('switchCitizen', 'Switch Citizen / Re-verify') : t('citizenLogin', 'Citizen OTP Login')}</span>
-          </button>
         </div>
       </section>
 

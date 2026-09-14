@@ -13,29 +13,34 @@ interface AuthModalsContainerProps {
 export const AuthModalsContainer: React.FC<AuthModalsContainerProps> = ({
   onOpenWorkerRegistration,
 }) => {
-  const { activeAuthModal, closeAuthModal } = useAuth();
+  const { activeAuthModal, authModalInitialTab, closeAuthModal } = useAuth();
 
   return (
     <>
       <CustomerAuthModal
         isOpen={activeAuthModal === 'CUSTOMER'}
+        initialTab={authModalInitialTab as any}
         onClose={closeAuthModal}
       />
       <WorkerAuthModal
         isOpen={activeAuthModal === 'WORKER'}
+        initialTab={authModalInitialTab as any}
         onClose={closeAuthModal}
         onOpenRegistration={onOpenWorkerRegistration}
       />
       <SocietyAdminAuthModal
         isOpen={activeAuthModal === 'SOCIETY_ADMIN'}
+        initialTab={authModalInitialTab as any}
         onClose={closeAuthModal}
       />
       <FederationAdminAuthModal
         isOpen={activeAuthModal === 'FEDERATION_ADMIN'}
+        initialTab={authModalInitialTab as any}
         onClose={closeAuthModal}
       />
       <SuperAdminAuthModal
         isOpen={activeAuthModal === 'SUPER_ADMIN'}
+        initialTab={authModalInitialTab as any}
         onClose={closeAuthModal}
       />
     </>

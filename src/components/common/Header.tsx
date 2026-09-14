@@ -15,6 +15,8 @@ import {
   X,
   PhoneCall,
   Shield,
+  ShieldCheck,
+  Users,
   KeyRound,
   LogIn,
   ChevronDown,
@@ -74,6 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
     logoutFederationAdmin,
     logoutSuperAdmin,
     logoutAll,
+    availableAccounts,
   } = useAuth();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -204,6 +207,18 @@ export const Header: React.FC<HeaderProps> = ({
             <User size={16} className="text-slate-500" />
             <span className="font-medium">{t('Profile', 'Profile')}</span>
           </button>
+          {/* Demo Profiles Button */}
+          <button
+            id="btn-toggle-menu-customer-demo-profiles"
+            onClick={() => {
+              setIsToggleMenuOpen(false);
+              openAuthModal('CUSTOMER', 'DEMO');
+            }}
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+          >
+            <Users size={16} className="text-emerald-600" />
+            <span className="font-medium text-slate-800">{t('Demo_Profiles__3__ethvy', `Demo Profiles (${availableAccounts.customers.length})`)}</span>
+          </button>
           <button
             id="btn-toggle-menu-booking-history-invoices"
             onClick={() => {
@@ -298,6 +313,18 @@ export const Header: React.FC<HeaderProps> = ({
             <User size={16} className="text-slate-500" />
             <span className="font-medium">{t('Profile', 'Profile')}</span>
           </button>
+          {/* Switch Active Craftsman Button */}
+          <button
+            id="btn-toggle-menu-worker-switch-craftsman"
+            onClick={() => {
+              setIsToggleMenuOpen(false);
+              openAuthModal('WORKER', 'DEMO');
+            }}
+            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+          >
+            <HardHat size={16} className="text-amber-600" />
+            <span className="font-medium text-slate-800">{t('Switch_Active_Craftsman___m3bbo', `Switch Active Craftsman (${availableAccounts.workers.length})`)}</span>
+          </button>
           <button
             id="btn-toggle-menu-order-card"
             onClick={() => {
@@ -375,17 +402,47 @@ export const Header: React.FC<HeaderProps> = ({
 
       {(currentRole === 'SOCIETY_ADMIN' || currentRole === 'FEDERATION_ADMIN' || currentRole === 'SUPER_ADMIN') && (
         <>
-          <button
-            id="btn-toggle-menu-admin-account"
-            onClick={() => {
-              setIsToggleMenuOpen(false);
-              openAuthModal(currentRole);
-            }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
-          >
-            <User size={16} className="text-slate-500" />
-            <span className="font-medium">Switch / Authorize Account</span>
-          </button>
+          {currentRole === 'SOCIETY_ADMIN' && (
+            <button
+              id="btn-toggle-menu-society-roster"
+              onClick={() => {
+                setIsToggleMenuOpen(false);
+                openAuthModal('SOCIETY_ADMIN', 'DEMO');
+              }}
+              className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            >
+              <Building2 size={16} className="text-blue-600" />
+              <span className="font-medium text-slate-800">{t('Society_Registrar_Roster___z6lfo', `Society Registrar Roster (${availableAccounts.societyAdmins.length})`)}</span>
+            </button>
+          )}
+
+          {currentRole === 'FEDERATION_ADMIN' && (
+            <button
+              id="btn-toggle-menu-federation-officers"
+              onClick={() => {
+                setIsToggleMenuOpen(false);
+                openAuthModal('FEDERATION_ADMIN', 'DEMO');
+              }}
+              className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            >
+              <Shield size={16} className="text-purple-600" />
+              <span className="font-medium text-slate-800">{t('Command_Officers___cmzy3', `Command Officers (${availableAccounts.federationAdmins.length})`)}</span>
+            </button>
+          )}
+
+          {currentRole === 'SUPER_ADMIN' && (
+            <button
+              id="btn-toggle-menu-superadmin-dignitaries"
+              onClick={() => {
+                setIsToggleMenuOpen(false);
+                openAuthModal('SUPER_ADMIN', 'DEMO');
+              }}
+              className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            >
+              <ShieldCheck size={16} className="text-amber-600" />
+              <span className="font-medium text-slate-800">{t('Authorized_Dignitaries_g1hey', `Authorized Dignitaries`)}</span>
+            </button>
+          )}
 
           {/* Pricing Dataset Button in Admin Toggle Menu */}
           <button
@@ -627,36 +684,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* Right Tools: Role Auth, Dataset Benchmark, Language, Reset, Notifications, Desktop Toggle Menu */}
+        {/* Right Tools: Reset, Notifications, Desktop Toggle Menu */}
         <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-2.5 w-full md:w-auto shrink-0">
-          {/* Active Role Authentication & Profile Button */}
-          <button
-            id={`btn-auth-${currentRole.toLowerCase()}`}
-            onClick={() => openAuthModal(currentRole)}
-            className={`flex-1 sm:flex-initial min-w-0 h-9 flex items-center justify-between sm:justify-start gap-2 px-3 rounded-xl border text-xs font-medium transition-all shadow-2xs ${activeAuthInfo.badgeColor}`}
-            title={`Click to authenticate or switch ${activeAuthInfo.roleLabel} account`}
-          >
-            <div className="relative flex items-center justify-center shrink-0">
-              {activeAuthInfo.icon}
-              <span
-                className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ring-1 ring-white ${activeAuthInfo.dotColor} ${
-                  activeAuthInfo.isAuth ? '' : 'opacity-60'
-                }`}
-              />
-            </div>
-            <div className="text-left hidden sm:block min-w-0">
-              <div className="font-semibold leading-tight text-slate-900 truncate max-w-[120px]">
-                {activeAuthInfo.name}
-              </div>
-              <div className="text-[10px] text-slate-500 truncate max-w-[130px]">
-                {activeAuthInfo.isAuth ? activeAuthInfo.subtitle : t('clickToSignIn', 'Click to Sign In')}
-              </div>
-            </div>
-            <span className="sm:hidden text-[11px] font-semibold text-slate-800 truncate">
-              {activeAuthInfo.isAuth ? activeAuthInfo.name.split(' ')[0] : t('signIn', 'Sign In')}
-            </span>
-            <ChevronDown size={13} className="text-slate-400 shrink-0" />
-          </button>
 
           {/* Desktop Action Tools Cluster: Reset, Notifications, Toggle Menu */}
           <div className="hidden md:flex items-center gap-1.5 shrink-0">

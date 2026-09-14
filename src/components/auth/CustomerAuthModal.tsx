@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Phone,
@@ -21,12 +21,14 @@ import { EmailVerificationWidget } from '../common/EmailVerificationWidget';
 
 interface CustomerAuthModalProps {
   isOpen: boolean;
+  initialTab?: 'LOGIN' | 'DEMO' | 'REGISTER';
   onClose: () => void;
   onSuccess?: () => void;
 }
 
 export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
   isOpen,
+  initialTab,
   onClose,
   onSuccess,
 }) => {
@@ -40,7 +42,13 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
     availableAccounts,
   } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'LOGIN' | 'DEMO' | 'REGISTER'>('LOGIN');
+  const [activeTab, setActiveTab] = useState<'LOGIN' | 'DEMO' | 'REGISTER'>(initialTab || 'LOGIN');
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isOpen]);
 
   // Form states
   const [phone, setPhone] = useState(customerUser?.phone || '9826012345');

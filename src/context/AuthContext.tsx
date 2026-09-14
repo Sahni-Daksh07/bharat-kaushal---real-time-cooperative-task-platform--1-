@@ -57,7 +57,8 @@ interface AuthContextType {
 
   // Modal Control
   activeAuthModal: UserRole | null;
-  openAuthModal: (role: UserRole) => void;
+  authModalInitialTab: string | null;
+  openAuthModal: (role: UserRole, initialTab?: string) => void;
   closeAuthModal: () => void;
 
   // Global Auth State
@@ -146,6 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Modal Control
   const [activeAuthModal, setActiveAuthModal] = useState<UserRole | null>(null);
+  const [authModalInitialTab, setAuthModalInitialTab] = useState<string | null>(null);
 
   // Accounts Directory
   const [availableAccounts, setAvailableAccounts] = useState({
@@ -749,12 +751,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ----------------------------------------------------
   // Modal Handlers
   // ----------------------------------------------------
-  const openAuthModal = (role: UserRole) => {
+  const openAuthModal = (role: UserRole, initialTab?: string) => {
+    setAuthModalInitialTab(initialTab || null);
     setActiveAuthModal(role);
   };
 
   const closeAuthModal = () => {
     setActiveAuthModal(null);
+    setAuthModalInitialTab(null);
   };
 
 
@@ -806,6 +810,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchSuperAdmin,
 
         activeAuthModal,
+        authModalInitialTab,
         openAuthModal,
         closeAuthModal,
 

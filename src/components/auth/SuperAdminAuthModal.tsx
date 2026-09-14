@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Shield,
@@ -21,12 +21,14 @@ import { EmailVerificationWidget } from '../common/EmailVerificationWidget';
 
 interface SuperAdminAuthModalProps {
   isOpen: boolean;
+  initialTab?: 'LOGIN' | 'REGISTER' | 'DEMO';
   onClose: () => void;
   onSuccess?: () => void;
 }
 
 export const SuperAdminAuthModal: React.FC<SuperAdminAuthModalProps> = ({
   isOpen,
+  initialTab,
   onClose,
   onSuccess,
 }) => {
@@ -40,7 +42,13 @@ export const SuperAdminAuthModal: React.FC<SuperAdminAuthModalProps> = ({
     availableAccounts,
   } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'LOGIN' | 'REGISTER' | 'DEMO'>('LOGIN');
+  const [activeTab, setActiveTab] = useState<'LOGIN' | 'REGISTER' | 'DEMO'>(initialTab || 'LOGIN');
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isOpen]);
 
   // Login Form
   const [officialId, setOfficialId] = useState(superAdminUser?.id || 'GOV-MOL-JS-001');

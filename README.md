@@ -69,7 +69,7 @@ Configure the following variables in your `.env` file:
 GEMINI_API_KEY="your_gemini_api_key_here"
 
 # Application URL (used for callbacks and links)
-APP_URL="http://localhost:3000"
+APP_URL="https://bharat-kaushal-real-time-cooperativ.vercel.app"
 
 # Optional: Geoapify API key for map tile styling and spatial routing
 VITE_GEOAPIFY_API_KEY="your_geoapify_api_key_here"

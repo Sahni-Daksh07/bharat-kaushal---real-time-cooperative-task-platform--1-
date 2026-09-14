@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Shield,
@@ -19,12 +19,14 @@ import { FederationAdminProfile } from '../../types';
 
 interface FederationAdminAuthModalProps {
   isOpen: boolean;
+  initialTab?: 'LOGIN' | 'DEMO';
   onClose: () => void;
   onSuccess?: () => void;
 }
 
 export const FederationAdminAuthModal: React.FC<FederationAdminAuthModalProps> = ({
   isOpen,
+  initialTab,
   onClose,
   onSuccess,
 }) => {
@@ -37,7 +39,13 @@ export const FederationAdminAuthModal: React.FC<FederationAdminAuthModalProps> =
     availableAccounts,
   } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'LOGIN' | 'DEMO'>('LOGIN');
+  const [activeTab, setActiveTab] = useState<'LOGIN' | 'DEMO'>(initialTab || 'LOGIN');
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isOpen]);
   const [officerId, setOfficerId] = useState(federationAdminUser?.id || 'FED-DIR-MP-001');
   const [passcode, setPasscode] = useState('2026-MP-GOV');
   const [clearanceLevel, setClearanceLevel] = useState<'LEVEL_4_EXECUTIVE' | 'LEVEL_3_DIRECTOR' | 'LEVEL_2_IMC_COMMAND'>('LEVEL_4_EXECUTIVE');

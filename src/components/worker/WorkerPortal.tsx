@@ -484,14 +484,6 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
               </button>
 
               <button
-                onClick={() => openAuthModal('WORKER')}
-                className="h-9 px-3.5 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 flex items-center justify-center gap-1.5 transition-all shadow-2xs"
-              >
-                <KeyRound size={14} className="text-blue-700" />
-                <span>PIN</span>
-              </button>
-
-              <button
                 onClick={() => {
                   if (confirm('🚨 ACTIVATE EMERGENCY SOS? This sends immediate distress alert to Society Operations & contacts Helpline 112.')) {
                     triggerSos(currentWorker.id, 'Worker triggered on-site distress signal in Indore');

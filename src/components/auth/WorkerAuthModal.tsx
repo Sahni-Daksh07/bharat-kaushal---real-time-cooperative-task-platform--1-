@@ -37,6 +37,7 @@ import { detectWorkerField, SUPPORTED_TRADES } from '../../utils/fieldDetector';
 
 interface WorkerAuthModalProps {
   isOpen: boolean;
+  initialTab?: 'LOGIN' | 'DEMO' | 'REGISTER';
   onClose: () => void;
   onOpenRegistration?: () => void;
   onSuccess?: () => void;
@@ -44,6 +45,7 @@ interface WorkerAuthModalProps {
 
 export const WorkerAuthModal: React.FC<WorkerAuthModalProps> = ({
   isOpen,
+  initialTab,
   onClose,
   onOpenRegistration,
   onSuccess,
@@ -59,7 +61,13 @@ export const WorkerAuthModal: React.FC<WorkerAuthModalProps> = ({
   } = useAuth();
   const { setCurrentWorkerId, currentWorker } = useRealtime();
 
-  const [activeTab, setActiveTab] = useState<'LOGIN' | 'DEMO' | 'REGISTER'>('LOGIN');
+  const [activeTab, setActiveTab] = useState<'LOGIN' | 'DEMO' | 'REGISTER'>(initialTab || 'LOGIN');
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isOpen]);
 
   // Form states - Login
   const [workerIdOrPhone, setWorkerIdOrPhone] = useState(workerUser?.id || 'BH-KAUSHAL-WKR-000124');

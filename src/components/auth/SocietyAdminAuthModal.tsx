@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Building2,
@@ -18,12 +18,14 @@ import { SocietyAdminProfile } from '../../types';
 
 interface SocietyAdminAuthModalProps {
   isOpen: boolean;
+  initialTab?: 'LOGIN' | 'DEMO';
   onClose: () => void;
   onSuccess?: () => void;
 }
 
 export const SocietyAdminAuthModal: React.FC<SocietyAdminAuthModalProps> = ({
   isOpen,
+  initialTab,
   onClose,
   onSuccess,
 }) => {
@@ -36,7 +38,13 @@ export const SocietyAdminAuthModal: React.FC<SocietyAdminAuthModalProps> = ({
     availableAccounts,
   } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'LOGIN' | 'DEMO'>('LOGIN');
+  const [activeTab, setActiveTab] = useState<'LOGIN' | 'DEMO'>(initialTab || 'LOGIN');
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isOpen]);
   const [societyId, setSocietyId] = useState(societyAdminUser?.societyId || 'SOC-IND-02');
   const [staffCode, setStaffCode] = useState(societyAdminUser?.id || 'ADM-IND-02-77');
   const [securityPin, setSecurityPin] = useState('7310');
