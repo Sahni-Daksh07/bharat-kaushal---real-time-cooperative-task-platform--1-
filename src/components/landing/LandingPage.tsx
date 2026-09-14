@@ -57,9 +57,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* 1. Header Navigation Bar - Appears ONLY when no account is logged in */}
       {!isLoggedIn && (
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <BharatKaushalLogo size="md" inline={true} showTagline={false} />
           </div>
 
@@ -92,14 +92,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Right Action Tools */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Language Switcher */}
             <div className="relative">
               <select
                 aria-label="Language selector"
                 value={lang}
                 onChange={(e) => onSelectLang(e.target.value as SupportedLanguage)}
-                className="h-9 bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium rounded-xl pl-3 pr-7 hover:border-slate-300 focus:outline-none cursor-pointer appearance-none"
+                className="h-8 sm:h-9 bg-slate-100 border border-slate-200 text-slate-800 text-[11px] sm:text-xs font-medium rounded-xl pl-2 sm:pl-3 pr-6 sm:pr-7 hover:border-slate-300 focus:outline-none cursor-pointer appearance-none transition-colors"
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code}>
@@ -107,13 +107,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </option>
                 ))}
               </select>
-              <Globe size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <Globe size={12} className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
 
             {/* Login Button */}
             <button
               onClick={() => onOpenAuth('CUSTOMER')}
-              className="h-9 px-4 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-slate-100 transition-all border border-slate-200"
+              className="h-8 sm:h-9 px-2.5 sm:px-4 rounded-xl text-[11px] sm:text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-slate-100 transition-all border border-slate-200 whitespace-nowrap"
             >
               {t('Login', 'Login')}
             </button>
@@ -121,7 +121,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Get Started Primary CTA */}
             <button
               onClick={() => onOpenAuth('WORKER')}
-              className="h-9 px-4 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all flex items-center gap-1.5"
+              className="h-8 sm:h-9 px-2.5 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all flex items-center gap-1 sm:gap-1.5 whitespace-nowrap"
             >
               <span>{t('Get_Started', 'Get Started')}</span>
               <ArrowRight size={13} />

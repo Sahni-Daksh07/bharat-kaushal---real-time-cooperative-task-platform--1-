@@ -506,24 +506,27 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs">
       {/* Top micro-bar for Helplines & Realtime Status */}
-      <div className="bg-slate-900 text-slate-300 text-xs px-4 sm:px-6 py-1.5 flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800">
-        <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs">
-          <div className="flex items-center gap-1.5 font-medium text-emerald-400 shrink-0">
-            <Radio size={12} className={connectionStatus === 'CONNECTED' ? 'animate-pulse' : ''} />
-            <span>{connectionStatus === 'CONNECTED' ? 'WebSockets: Live Sync' : 'Reconnecting...'}</span>
+      <div className="bg-slate-900 text-slate-300 text-xs px-3 sm:px-6 py-1 sm:py-1.5 flex flex-row items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800 min-w-0 overflow-hidden">
+        <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs min-w-0 overflow-hidden">
+          <div className="flex items-center gap-1 sm:gap-1.5 font-medium text-emerald-400 shrink-0">
+            <Radio size={11} className={connectionStatus === 'CONNECTED' ? 'animate-pulse' : ''} />
+            <span className="hidden sm:inline">{connectionStatus === 'CONNECTED' ? 'WebSockets: Live Sync' : 'Reconnecting...'}</span>
+            <span className="sm:hidden">{connectionStatus === 'CONNECTED' ? 'Live' : '...'}</span>
           </div>
-          <span className="text-slate-600 hidden sm:inline">|</span>
-          <span className="text-slate-400 truncate max-w-[220px] sm:max-w-none">{t('Indore_Municipal_Corporation___d73zu', `Indore Municipal Corporation (IMC) Cooperative Labour Zone`)}</span>
+          <span className="text-slate-600 hidden md:inline">|</span>
+          <span className="text-slate-400 truncate hidden md:inline">{t('Indore_Municipal_Corporation___d73zu', `Indore Municipal Corporation (IMC) Cooperative Labour Zone`)}</span>
         </div>
 
-        <div className="flex items-center gap-3 text-[10px] sm:text-[11px] shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 text-[9px] sm:text-[11px] shrink-0">
           <a
             href="tel:1915"
             className="flex items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors"
             title={t('National_Consumer_Helpline_dwo4g', `National Consumer Helpline`)}
           >
             <PhoneCall size={11} />
-            <span>{t('National_Consumer_Helpline__3jpsq', `National Consumer Helpline:`)}<strong>{t('1915_a94oz', `1915`)}</strong> {t('_8_AM___8_PM__szw20', `(8 AM - 8 PM)`)}</span>
+            <span className="hidden sm:inline">{t('National_Consumer_Helpline__3jpsq', `National Consumer Helpline:`)}</span>
+            <strong>{t('1915_a94oz', `1915`)}</strong>
+            <span className="hidden lg:inline">{t('_8_AM___8_PM__szw20', `(8 AM - 8 PM)`)}</span>
           </a>
           <span className="text-slate-600">|</span>
           <a
@@ -531,15 +534,16 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-1 text-rose-400 hover:text-rose-300 font-semibold transition-colors"
             title={t('National_Emergency_Service_ktd88', `National Emergency Service`)}
           >
-            <span>{t('Emergency_SOS__6cki1', `Emergency SOS:`)}<strong>{t('112_f7utb', `112`)}</strong></span>
+            <span className="hidden sm:inline">{t('Emergency_SOS__6cki1', `Emergency SOS:`)}</span>
+            <strong>{t('112_f7utb', `112`)}</strong>
           </a>
         </div>
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 relative">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-2.5 flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-4 relative min-w-0">
         {/* Brand Logo & Mobile Quick Controls */}
-        <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-3 sm:gap-4">
+        <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-2 sm:gap-3 shrink-0">
           {onNavigateHome ? (
             <button
               id="btn-header-logo-home"
@@ -604,7 +608,7 @@ export const Header: React.FC<HeaderProps> = ({
                     />
                     <div
                       ref={mobileMenuContainerRef}
-                      className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-xs bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[80vh] overflow-y-auto"
+                      className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-xs bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto"
                     >
                       {renderToggleMenuItems()}
                     </div>
@@ -614,78 +618,87 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Multi-role Navigation Tabs */}
-        <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
+        {/* Multi-role Navigation Tabs - Dynamically adapts to any aspect ratio */}
+        <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold overflow-x-auto no-scrollbar scroll-smooth max-w-full shrink min-w-0">
           <button
             id="nav-role-customer"
             onClick={() => onSelectRole('CUSTOMER')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap ${
               currentRole === 'CUSTOMER'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
-            <User size={14} />
+            <User size={14} className="shrink-0" />
             <span>{t('customer', 'Customer')}</span>
           </button>
 
           <button
             id="nav-role-worker"
             onClick={() => onSelectRole('WORKER')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap ${
               currentRole === 'WORKER'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
-            <HardHat size={14} />
-            <span>{t('worker', 'Cooperative Worker')}</span>
+            <HardHat size={14} className="shrink-0" />
+            <span>
+              <span className="hidden xl:inline">{t('cooperative', 'Cooperative')} </span>
+              {t('worker', 'Worker')}
+            </span>
           </button>
 
           <button
             id="nav-role-society"
             onClick={() => onSelectRole('SOCIETY_ADMIN')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap ${
               currentRole === 'SOCIETY_ADMIN'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
-            <Building2 size={14} />
-            <span>{t('societyAdmin', 'Society Admin')}</span>
+            <Building2 size={14} className="shrink-0" />
+            <span>
+              <span className="hidden lg:inline">{t('society', 'Society')} </span>
+              {t('Admin', 'Admin')}
+            </span>
           </button>
 
           <button
             id="nav-role-federation"
             onClick={() => onSelectRole('FEDERATION_ADMIN')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap ${
               currentRole === 'FEDERATION_ADMIN'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
-            <Sliders size={14} />
-            <span>{t('federationAdmin', 'Federation Command')}</span>
+            <Sliders size={14} className="shrink-0" />
+            <span>
+              {t('Federation', 'Federation')}
+              <span className="hidden xl:inline"> {t('Command', 'Command')}</span>
+            </span>
           </button>
 
           <button
             id="nav-role-super-admin"
             onClick={() => onSelectRole('SUPER_ADMIN')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all font-bold ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all font-bold shrink-0 whitespace-nowrap ${
               currentRole === 'SUPER_ADMIN'
                 ? 'bg-amber-600 text-white shadow-xs'
                 : 'text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200'
             }`}
           >
-            <Shield size={14} className={currentRole === 'SUPER_ADMIN' ? 'text-white' : 'text-amber-600'} />
+            <Shield size={14} className={`shrink-0 ${currentRole === 'SUPER_ADMIN' ? 'text-white' : 'text-amber-600'}`} />
             <span>{t('Super_Admin_d4d1r', `Super Admin`)}</span>
-            <span className="text-[9px] bg-amber-200 text-amber-950 px-1 rounded uppercase tracking-wider font-mono">
+            <span className="hidden xl:inline text-[9px] bg-amber-200 text-amber-950 px-1 rounded uppercase tracking-wider font-mono">
               {t('Govt_2ti61', `Govt`)}</span>
           </button>
         </div>
 
         {/* Right Tools: Reset, Notifications, Desktop Toggle Menu */}
-        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-2.5 w-full md:w-auto shrink-0">
+        <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full md:w-auto shrink-0">
 
           {/* Desktop Action Tools Cluster: Reset, Notifications, Toggle Menu */}
           <div className="hidden md:flex items-center gap-1.5 shrink-0">
@@ -747,7 +760,7 @@ export const Header: React.FC<HeaderProps> = ({
                   />
                   <div
                     ref={toggleMenuContainerRef}
-                    className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[85vh] overflow-y-auto"
+                    className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto"
                   >
                     {renderToggleMenuItems()}
                   </div>
@@ -765,7 +778,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-[0.5px]"
               onClick={() => setShowNotifications(false)}
             />
-            <div className="absolute right-3 sm:right-6 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="absolute right-3 sm:right-6 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto">
               <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                 <span className="font-bold text-xs uppercase tracking-wider text-slate-700">{t('realtimeStream', 'Real-time Stream')}</span>
                 <button
@@ -796,10 +809,10 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Mobile Role Switcher Bar */}
-      <div className="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar px-4 py-2 bg-slate-50 border-t border-slate-200 text-xs font-semibold scroll-smooth">
+      <div className="md:hidden flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar px-2.5 sm:px-4 py-1.5 sm:py-2 bg-slate-50 border-t border-slate-200 text-[11px] sm:text-xs font-semibold scroll-smooth">
         <button
           onClick={() => onSelectRole('CUSTOMER')}
-          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
             currentRole === 'CUSTOMER' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-200/60'
           }`}
         >
@@ -808,7 +821,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => onSelectRole('WORKER')}
-          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
             currentRole === 'WORKER' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-200/60'
           }`}
         >
@@ -817,7 +830,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => onSelectRole('SOCIETY_ADMIN')}
-          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
             currentRole === 'SOCIETY_ADMIN' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-200/60'
           }`}
         >
@@ -826,7 +839,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => onSelectRole('FEDERATION_ADMIN')}
-          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
             currentRole === 'FEDERATION_ADMIN' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-200/60'
           }`}
         >
@@ -835,7 +848,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => onSelectRole('SUPER_ADMIN')}
-          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-bold ${
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-bold ${
             currentRole === 'SUPER_ADMIN' ? 'bg-amber-600 text-white shadow-xs' : 'text-amber-900 bg-amber-100 hover:bg-amber-200/80 border border-amber-300/60'
           }`}
         >

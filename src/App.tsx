@@ -313,70 +313,71 @@ function MainAppContent() {
           setCurrentView('PORTAL');
         }}
       />
-
-      {/* Statutory Footer */}
-      <footer className="bg-white border-t border-slate-200 mt-12 text-xs text-slate-500 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <ShieldCheck size={18} className="text-blue-700" />
-                <span>{t('Bharat_Kaushal_Cooperative_Lab_8wsb8', `Bharat Kaushal Cooperative Labour Platform`)}</span>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                {t('A_digitally_transparent__coope_mw360', `A digitally transparent, cooperative-owned labour platform operating under the Madhya Pradesh Cooperative Societies Act, 1960. 94.5% to 95.0% of every rupee spent goes directly to certified skilled workers.`)}</p>
-            </div>
-
-            <div>
-              <div className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <Building2 size={18} className="text-blue-700" />
-                <span>{t('Statutory_Compliance___Social__uwib8', `Statutory Compliance & Social Security`)}</span>
-              </div>
-              <ul className="mt-2 space-y-1 text-slate-600 text-[11px]">
-                <li>{t('__Unorganized_Workers_apos__So_g13lk', `• Unorganized Workers&apos; Social Security Act, 2008`)}</li>
-                <li>{t('__2_0__Automatic_Allocation_to_r739u', `• 2.0% Automatic Allocation to MP Labour Welfare Fund (MPSLWB)`)}</li>
-                <li>{t('__UIDAI_Aadhaar_Masking___Data_04tld', `• UIDAI Aadhaar Masking & Data Minimization Compliant`)}</li>
-                <li>{t('__100__Explainable_Algorithmic_uk0hj', `• 100% Explainable Algorithmic Trust Scores (Zero Black-Box De-platforming)`)}</li>
-              </ul>
-            </div>
-
-            <div>
-              <div className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <PhoneCall size={18} className="text-amber-600" />
-                <span>{t('Statutory_Helplines_0yfm3', `Statutory Helplines`)}</span>
-              </div>
-              <div className="mt-2 space-y-1.5 text-xs text-slate-600">
-                <div>
-                  <strong>{t('National_Consumer_Helpline__3katp', `National Consumer Helpline:`)}</strong>{' '}
-                  <a href="tel:1915" className="text-blue-700 font-semibold hover:underline">
-                    {t('1915_c9ti9', `1915`)}</a>{' '}
-                  {t('or_a6b4u', `or`)}{' '}
-                  <a href="tel:1800114000" className="text-blue-700 font-semibold hover:underline">
-                    {t('1800_11_4000_rgf46', `1800-11-4000`)}</a>{' '}
-                  {t('_8_00_AM_to_8_00_PM__0o1ag', `(8:00 AM to 8:00 PM)`)}</div>
-                <div>
-                  <strong>{t('Emergency_SOS___Police__dvipo', `Emergency SOS / Police:`)}</strong>{' '}
-                  <a href="tel:112" className="text-rose-600 font-bold hover:underline">
-                    {t('112_2ukc7', `112`)}</a>
+      {/* Statutory Footer - Visible only on logged-in portals */}
+      {currentView === 'PORTAL' && (
+        <footer className="bg-white border-t border-slate-200 mt-12 text-xs text-slate-500 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <div className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                  <ShieldCheck size={18} className="text-blue-700" />
+                  <span>{t('Bharat_Kaushal_Cooperative_Lab_8wsb8', `Bharat Kaushal Cooperative Labour Platform`)}</span>
                 </div>
-                <div className="text-[11px] text-slate-400 pt-1">
-                  {t('IMC_Cooperative_Operations_Com_toke3', `IMC Cooperative Operations Command, Indore, Madhya Pradesh - 452001`)}</div>
+                <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                  {t('A_digitally_transparent__coope_mw360', `A digitally transparent, cooperative-owned labour platform operating under the Madhya Pradesh Cooperative Societies Act, 1960. 94.5% to 95.0% of every rupee spent goes directly to certified skilled workers.`)}</p>
+              </div>
+
+              <div>
+                <div className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                  <Building2 size={18} className="text-blue-700" />
+                  <span>{t('Statutory_Compliance___Social__uwib8', `Statutory Compliance & Social Security`)}</span>
+                </div>
+                <ul className="mt-2 space-y-1 text-slate-600 text-[11px]">
+                  <li>{t('__Unorganized_Workers_apos__So_g13lk', `• Unorganized Workers&apos; Social Security Act, 2008`)}</li>
+                  <li>{t('__2_0__Automatic_Allocation_to_r739u', `• 2.0% Automatic Allocation to MP Labour Welfare Fund (MPSLWB)`)}</li>
+                  <li>{t('__UIDAI_Aadhaar_Masking___Data_04tld', `• UIDAI Aadhaar Masking & Data Minimization Compliant`)}</li>
+                  <li>{t('__100__Explainable_Algorithmic_uk0hj', `• 100% Explainable Algorithmic Trust Scores (Zero Black-Box De-platforming)`)}</li>
+                </ul>
+              </div>
+
+              <div>
+                <div className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                  <PhoneCall size={18} className="text-amber-600" />
+                  <span>{t('Statutory_Helplines_0yfm3', `Statutory Helplines`)}</span>
+                </div>
+                <div className="mt-2 space-y-1.5 text-xs text-slate-600">
+                  <div>
+                    <strong>{t('National_Consumer_Helpline__3katp', `National Consumer Helpline:`)}</strong>{' '}
+                    <a href="tel:1915" className="text-blue-700 font-semibold hover:underline">
+                      {t('1915_c9ti9', `1915`)}</a>{' '}
+                    {t('or_a6b4u', `or`)}{' '}
+                    <a href="tel:1800114000" className="text-blue-700 font-semibold hover:underline">
+                      {t('1800_11_4000_rgf46', `1800-11-4000`)}</a>{' '}
+                    {t('_8_00_AM_to_8_00_PM__0o1ag', `(8:00 AM to 8:00 PM)`)}</div>
+                  <div>
+                    <strong>{t('Emergency_SOS___Police__dvipo', `Emergency SOS / Police:`)}</strong>{' '}
+                    <a href="tel:112" className="text-rose-600 font-bold hover:underline">
+                      {t('112_2ukc7', `112`)}</a>
+                  </div>
+                  <div className="text-[11px] text-slate-400 pt-1">
+                    {t('IMC_Cooperative_Operations_Com_toke3', `IMC Cooperative Operations Command, Indore, Madhya Pradesh - 452001`)}</div>
+                  </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
+              <div>
+                {t('__2026_Bharat_Kaushal__Coopera_6wocw', `© 2026 Bharat Kaushal. Cooperative Digital Public Infrastructure (DPI) for Fair Skilled Labour.`)}</div>
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  {t('WebSocket_Engine_Online_fnvyr', `WebSocket Engine Online`)}</span>
+                <span>{t('140_Indore_Service_Rates_Activ_h1yqv', `140 Indore Service Rates Active`)}</span>
               </div>
             </div>
           </div>
-
-          <div className="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
-            <div>
-              {t('__2026_Bharat_Kaushal__Coopera_6wocw', `© 2026 Bharat Kaushal. Cooperative Digital Public Infrastructure (DPI) for Fair Skilled Labour.`)}</div>
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                {t('WebSocket_Engine_Online_fnvyr', `WebSocket Engine Online`)}</span>
-              <span>{t('140_Indore_Service_Rates_Activ_h1yqv', `140 Indore Service Rates Active`)}</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

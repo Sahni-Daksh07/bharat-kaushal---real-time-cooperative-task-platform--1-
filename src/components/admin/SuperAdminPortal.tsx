@@ -384,7 +384,7 @@ export const SuperAdminPortal: React.FC = () => {
       {/* 2. Main Body Container with Sidebar and Dynamic Content View */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Left Navigation Sidebar */}
-        <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col shrink-0 overflow-y-auto max-h-[calc(100vh-60px)]">
+        <aside className="hidden md:flex w-52 lg:w-64 bg-white border-r border-slate-200 flex-col shrink-0 overflow-y-auto max-h-[calc(100dvh-60px)]">
           <div className="p-3 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold uppercase tracking-wider">
             <span>{t('Governance_Command_ecpfl', `Governance Command`)}</span>
             <span className="font-mono text-[10px] text-blue-600 font-bold">{t('22_Modules_jin2s', `22 Modules`)}</span>
