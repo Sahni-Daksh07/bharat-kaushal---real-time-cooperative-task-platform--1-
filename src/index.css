@@ -64,6 +64,19 @@ body {
   --dashboard-card-pad-mobile: 1rem;     /* 16px standard inner card padding on mobile */
   --dashboard-card-pad-desktop: 1.5rem;  /* 24px standard inner card padding on desktop */
   --dashboard-gap-mobile: 1rem;          /* 16px standard gap between cards */
+
+  /* Bharat Kaushal Brand Tokens */
+  --bk-navy: #0b132b;
+  --bk-navy-dark: #070d1e;
+  --bk-navy-light: #1c2541;
+  --bk-blue: #2563eb;
+  --bk-blue-hover: #1d4ed8;
+  --bk-saffron: #f59e0b;
+  --bk-saffron-dark: #d97706;
+  --bk-emerald: #059669;
+  --bk-emerald-light: #ecfdf5;
+  --bk-bg: #f8fafc;
+  --bk-card-border: rgba(226, 232, 240, 0.85);
 }
 
 /* Dashboard Root Container */
@@ -71,6 +84,46 @@ body {
 [data-dashboard-container="true"] {
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Modern Card Styling */
+.bk-card {
+  background: #ffffff;
+  border: 1px solid var(--bk-card-border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
+  transition: all 0.2s ease-in-out;
+}
+
+.bk-card:hover {
+  border-color: rgba(203, 213, 225, 0.95);
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+}
+
+/* Interactive Badge & Button Effects */
+.bk-badge-green {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.bk-badge-blue {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.bk-badge-saffron {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* Mobile Safe Bottom Padding for Persistent Bottom Nav */
+@media (max-width: 639px) {
+  body {
+    padding-bottom: 4.5rem;
+  }
 }
 
 /* Standardized Mobile Viewport Alignment Rules */

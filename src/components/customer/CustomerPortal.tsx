@@ -529,6 +529,12 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({ lang }) => {
               </h2>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              {activeBooking.workerLocation && (
+                <div className="inline-flex items-center gap-1.5 bg-blue-600 text-white font-bold text-xs px-3 py-1 rounded-full shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
+                  <span>{activeBooking.workerLocation.etaMinutes} min • {activeBooking.workerLocation.distanceKm} km</span>
+                </div>
+              )}
               <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
                 {activeBooking.status.replace(/_/g, ' ')}
               </span>

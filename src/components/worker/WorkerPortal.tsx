@@ -38,6 +38,20 @@ import {
   Compass,
   Mail,
   ClipboardList,
+  Star,
+  MessageSquare,
+  Calendar,
+  ChevronRight,
+  TrendingUp,
+  Heart,
+  Search,
+  Filter,
+  ArrowRight,
+  Check,
+  Briefcase,
+  Users,
+  Award,
+  HeartHandshake,
 } from 'lucide-react';
 
 interface WorkerPortalProps {
@@ -76,19 +90,25 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
 
   // Profile Modal State
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [portalTab, setPortalTab] = useState<'DASHBOARD' | 'ORDER_CARD' | 'INCOME_HISTORY'>('DASHBOARD');
+  const [portalTab, setPortalTab] = useState<'DASHBOARD' | 'FIND_WORK' | 'ORDER_CARD' | 'INCOME_HISTORY'>('DASHBOARD');
+  
+  // Selected Job Details Modal State (Mockup #1 Screen 5)
+  const [selectedJobDetails, setSelectedJobDetails] = useState<any | null>(null);
   
   // Custom Event Listeners from Header Menu
   React.useEffect(() => {
     const handleProfile = () => setIsProfileModalOpen(true);
+    const handleFindWork = () => setPortalTab('FIND_WORK');
     const handleOrderCard = () => setPortalTab('ORDER_CARD');
     const handleIncome = () => setPortalTab('INCOME_HISTORY');
     
     document.addEventListener('OPEN_PROFILE', handleProfile);
+    document.addEventListener('OPEN_FIND_WORK', handleFindWork);
     document.addEventListener('OPEN_ORDER_CARD', handleOrderCard);
     document.addEventListener('OPEN_INCOME_HISTORY', handleIncome);
     return () => {
       document.removeEventListener('OPEN_PROFILE', handleProfile);
+      document.removeEventListener('OPEN_FIND_WORK', handleFindWork);
       document.removeEventListener('OPEN_ORDER_CARD', handleOrderCard);
       document.removeEventListener('OPEN_INCOME_HISTORY', handleIncome);
     };
@@ -377,462 +397,887 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
 
   return (
     <div className="space-y-6 dashboard-container" data-dashboard-container="true">
-      {/* Worker Identity Header Card */}
+      {/* 1. Worker Identity & Context Header (Desktop Mockup #4) */}
       <section className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs dashboard-card" data-dashboard-card="true">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-4 w-full md:w-auto min-w-0 flex-1">
-            <button
-              type="button"
-              id="btn-worker-avatar-profile"
-              onClick={() => setIsProfileModalOpen(true)}
-              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 text-white font-black text-xl flex items-center justify-center shadow-md shrink-0 overflow-hidden border-2 border-amber-300 transition-transform hover:scale-105 active:scale-95 group relative"
-              title={t('Click_to_view_full_Craftsman_D_e86f4', `Click to view full Craftsman Dossier & Aadhaar Details`)}
-            >
-              {currentWorker.photoUrl ? (
-                <img
-                  src={currentWorker.photoUrl}
-                  alt={currentWorker.name}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <HardHat size={28} />
-              )}
-              <span className="absolute bottom-0 right-0 bg-stone-900/80 text-amber-300 p-0.5 rounded-tl text-[9px]">
-                {t('___qjc60', `🪪`)}</span>
-            </button>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Welcome Greeting & Availability Toggle */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                id="btn-worker-avatar-profile"
+                onClick={() => setIsProfileModalOpen(true)}
+                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 text-white font-black text-lg flex items-center justify-center shadow-md shrink-0 overflow-hidden border-2 border-amber-300 transition-transform hover:scale-105 active:scale-95 group relative"
+                title={t('Click_to_view_full_Craftsman_D_e86f4', `Click to view full Craftsman Dossier & Aadhaar Details`)}
+              >
+                {currentWorker.photoUrl ? (
+                  <img
+                    src={currentWorker.photoUrl}
+                    alt={currentWorker.name}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <HardHat size={24} />
+                )}
+              </button>
 
-            <div className="space-y-1 min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsProfileModalOpen(true)}
-                  className="text-xl font-black text-slate-900 hover:text-amber-800 transition-colors text-left flex items-center gap-2"
-                >
-                  <span>{currentWorker.name}</span>
-                  <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-semibold">
-                    {t('View_Profile_s9jms', `View Profile`)}</span>
-                </button>
-                <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                  {currentWorker.id}
-                </span>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <span>Namaste, {currentWorker.name}!</span>
+                  <span className="text-xl">👋</span>
+                </h1>
+                <p className="text-xs text-slate-500 font-normal">
+                  Good to see you back. Skilled people build stronger communities.
+                </p>
+              </div>
+            </div>
 
-                {/* Worker Selector for Quick Testing */}
-                <select
-                  value={currentWorker.id}
-                  onChange={(e) => setCurrentWorkerId(e.target.value)}
-                  className="max-w-full text-xs bg-slate-50 border border-slate-300 rounded px-2 py-0.5 text-slate-700 font-medium truncate"
-                  title={t('Switch_worker_demo_profile_kc9u9', `Switch worker demo profile`)}
-                >
-                  {workers.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.name} ({w.primaryTrade} - {w.verificationStatus})
-                    </option>
-                  ))}
-                </select>
+            {/* Availability Pill & Change Button (Mockup #4) */}
+            <div className="flex items-center gap-2 pt-1">
+              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${
+                currentWorker.availability
+                  ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
+                  : 'bg-slate-100 text-slate-700 border-slate-300'
+              }`}>
+                <span className={`w-2.5 h-2.5 rounded-full ${currentWorker.availability ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                <span>{currentWorker.availability ? 'Available for Work' : 'Currently Offline'}</span>
               </div>
 
-              <div className="text-xs text-slate-600 flex flex-wrap items-center gap-3">
-                <span className="font-semibold text-blue-700">{currentWorker.primaryTrade} {t('Trade_4dutm', `Trade`)}</span>
-                <span>•</span>
-                <span className="text-slate-500">{currentWorker.societyName}</span>
-                <span>•</span>
-                <span className="text-emerald-700 font-medium">{t('Aadhaar__dn70x', `Aadhaar:`)}{currentWorker.maskedAadhaar}</span>
-                <span>•</span>
-                <span className="text-slate-500">{currentWorker.city || 'Indore'}{t('__MP_0622c', `, MP`)}</span>
-              </div>
+              <button
+                id="worker-toggle-availability"
+                onClick={() => toggleWorkerAvailability(currentWorker.id)}
+                disabled={currentWorker.verificationStatus !== 'VERIFIED'}
+                className="h-8 px-3 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer border border-slate-200"
+              >
+                Change
+              </button>
+
+              <span className="text-slate-300 hidden sm:inline">|</span>
+
+              <span className="text-xs text-slate-600 hidden sm:inline">
+                {currentWorker.primaryTrade} • {currentWorker.city || 'Indore'}, MP
+              </span>
             </div>
           </div>
 
-          {/* Right Action: Profile Button, Availability Toggle & Auth Button */}
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto mt-3 md:mt-0">
-            {/* Dedicated Worker Profile & Dossier Button */}
-            <button
-              id="btn-worker-profile-main"
-              type="button"
-              onClick={() => setIsProfileModalOpen(true)}
-              className="flex-1 sm:flex-initial h-9 px-3 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center gap-1.5 transition-all shadow-2xs whitespace-nowrap"
-              title={t('Open_full_worker_details__Perm_7j4za', `Open full worker details: Permanent/Temporary Address, Aadhaar card, Mobile number`)}
-            >
-              <HardHat size={14} className="text-amber-700 shrink-0" />
-              <span>{t('Worker_Profile_f0nfw', `Worker Profile`)}</span>
-            </button>
+          {/* Right Cultural Quote Banner & Quick Actions (Mockup #4) */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-blue-500/10 border border-amber-200/80 rounded-2xl p-3 sm:px-4 text-center sm:text-right">
+              <p className="text-xs font-bold text-amber-950 font-serif">
+                &ldquo;हर कौशल एक बेहतर भारत की नींव है।&rdquo;
+              </p>
+              <div className="h-0.5 w-16 bg-amber-500/60 rounded-full mx-auto sm:ml-auto sm:mr-0 my-1" />
+              <p className="text-[10px] text-slate-500 font-medium">
+                — Bharat Kaushal
+              </p>
+            </div>
 
-            {/* Dedicated Worker Auth / PIN Button */}
-            <button
-              id="btn-worker-portal-auth-trigger"
-              onClick={() => openAuthModal('WORKER')}
-              className={`flex-1 sm:flex-initial h-9 flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-all shadow-xs border whitespace-nowrap ${
-                isWorkerAuthenticated
-                  ? 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100'
-                  : 'bg-amber-600 hover:bg-amber-700 text-white border-amber-700'
-              }`}
-              title={t('Worker_login_with_ID___Registe_y1x7f', `Worker login with ID / Registered Mobile & Trade Security PIN`)}
-            >
-              <KeyRound size={14} className="shrink-0" />
-              <span>{isWorkerAuthenticated ? 'Craftsman Auth' : 'Worker Login / PIN'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsProfileModalOpen(true)}
+                className="h-9 px-3.5 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+              >
+                <HardHat size={14} className="text-amber-700" />
+                <span>Profile</span>
+              </button>
 
-            {/* Availability Switch */}
-            <button
-              id="worker-toggle-availability"
-              onClick={() => toggleWorkerAvailability(currentWorker.id)}
-              disabled={currentWorker.verificationStatus !== 'VERIFIED'}
-              className={`h-9 flex items-center justify-center gap-2 px-3 rounded-xl text-xs font-bold transition-all shadow-xs whitespace-nowrap ${
-                currentWorker.availability
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
-              }`}
-            >
-              <span className={`w-2 h-2 rounded-full ${currentWorker.availability ? 'bg-white animate-ping' : 'bg-slate-500'}`} />
-              <span>{currentWorker.availability ? 'ONLINE' : 'OFFLINE'}</span>
-            </button>
+              <button
+                onClick={() => openAuthModal('WORKER')}
+                className="h-9 px-3.5 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+              >
+                <KeyRound size={14} className="text-blue-700" />
+                <span>PIN</span>
+              </button>
 
-            {/* Map Mode Quick Switcher */}
-            <button
-              id="btn-worker-map-toggle"
-              onClick={() => setWorkerMapTab((prev) => (prev === 'MAP_ONLY' ? 'SPLIT' : 'MAP_ONLY'))}
-              className={`h-9 flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-all shadow-xs border whitespace-nowrap ${
-                workerMapTab === 'MAP_ONLY'
-                  ? 'bg-blue-600 text-white border-blue-700'
-                  : 'bg-white text-slate-800 border-slate-300 hover:bg-slate-50'
-              }`}
-              title={t('Toggle_Live_Worker_Map___Turn__jetp5', `Toggle Live Worker Map & Turn-by-Turn GPS Navigation`)}
-            >
-              <MapPin size={14} className={workerMapTab === 'MAP_ONLY' ? 'text-white shrink-0' : 'text-blue-600 shrink-0'} />
-              <span>{workerMapTab === 'MAP_ONLY' ? 'Exit Map' : 'Live Map'}</span>
-            </button>
-
-            {/* Skill Assessment Modal Trigger */}
-            <button
-              onClick={() => setIsSkillAssessmentOpen(true)}
-              className="h-9 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs whitespace-nowrap"
-              title={t('Take_or_Retake_the_15_question_yqj11', `Take or Retake the 15-question trade skill assessment`)}
-            >
-              <Zap size={14} className="text-emerald-600 shrink-0" />
-              <span>{t('Skill___7uzmi', `Skill (`)}{currentWorker.skillAssessmentScore ? `${currentWorker.skillAssessmentScore}%` : 'Test'})</span>
-            </button>
-
-            {/* SOS Trigger Button */}
-            <button
-              onClick={() => {
-                if (confirm('🚨 ACTIVATE EMERGENCY SOS? This sends immediate distress alert to Society Operations & contacts Helpline 112.')) {
-                  triggerSos(currentWorker.id, 'Worker triggered on-site distress signal in Indore');
-                }
-              }}
-              className="h-9 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap"
-              title={t('Emergency_SOS__Safety_Distress_0fp9u', `Emergency SOS (Safety Distress)`)}
-            >
-              <AlertOctagon size={14} className="shrink-0" />
-              <span>{t('SOS_iw718', `SOS`)}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Verification Status Banner */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-slate-700">{t('Verification_State__rutcc', `Verification State:`)}</span>
-            {currentWorker.verificationStatus === 'VERIFIED' ? (
-              <span className="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <CheckCircle2 size={13} />
-                <span>{t('Verified_by_Society___Authorit_12t0s', `Verified by Society & Authority`)}</span>
-              </span>
-            ) : currentWorker.verificationStatus === 'UNDER_REVIEW' ? (
-              <span className="bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <Clock size={13} />
-                <span>{t('Under_Review_by_Society_Admin_kd31m', `Under Review by Society Admin`)}</span>
-              </span>
-            ) : (
-              <span className="bg-rose-100 text-rose-800 font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <AlertTriangle size={13} />
-                <span>{t('Rejected__0mb4q', `Rejected:`)}{currentWorker.rejectionReason || 'Document mismatch'}</span>
-              </span>
-            )}
-
-            {/* Email Verification Pill */}
-            <button
-              type="button"
-              onClick={() => setIsEmailModalOpen(true)}
-              className={`font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 transition-all border ${
-                currentWorker.emailVerified
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                  : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
-              }`}
-              title={t('Click_to_manage_email_notices__lr09m', `Click to manage email notices (Optional)`)}
-            >
-              <Mail size={12} />
-              <span>
-                {currentWorker.emailVerified
-                  ? `✓ ${currentWorker.email || 'Email Verified'}`
-                  : currentWorker.email
-                  ? `Verify ${currentWorker.email}`
-                  : '+ Add Email (Optional)'}
-              </span>
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs font-medium">
-            <button
-              onClick={() => setShowTrustModal(true)}
-              className="flex items-center gap-1 text-blue-700 hover:underline cursor-pointer"
-            >
-              <ShieldCheck size={14} className="text-emerald-600" />
-              <span>{t('Trust_Score__zwnl7', `Trust Score:`)}<strong>{currentWorker.trustScore}{t('_100_znbc2', `/100`)}</strong> {t('_Explain__ym1dr', `(Explain)`)}</span>
-            </button>
-            <span className="text-slate-300">|</span>
-            <span className="text-slate-700">{t('Reliability__hwpth', `Reliability:`)}<strong>{currentWorker.reliabilityScore}%</strong></span>
-            <span className="text-slate-300">|</span>
-            <span className="text-slate-700">{t('Jobs__k5ave', `Jobs:`)}<strong>{currentWorker.completedJobs}</strong></span>
+              <button
+                onClick={() => {
+                  if (confirm('🚨 ACTIVATE EMERGENCY SOS? This sends immediate distress alert to Society Operations & contacts Helpline 112.')) {
+                    triggerSos(currentWorker.id, 'Worker triggered on-site distress signal in Indore');
+                  }
+                }}
+                className="h-9 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                title="Emergency SOS"
+              >
+                <AlertOctagon size={14} />
+                <span>SOS</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Navigation Tabs for Worker Dashboard */}
+      {/* 2. Key Metrics Grid (Desktop Mockup #4) */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 dashboard-card" data-dashboard-card="true">
+        {/* Metric 1: Today's Earnings */}
+        <div className="bk-card p-4 sm:p-5 flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Today&apos;s Earnings</span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">
+              ₹{currentWorker.earnings?.today || 1850}
+            </div>
+            <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+              <TrendingUp size={12} />
+              <span>+12% from yesterday</span>
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
+            <Wallet size={18} />
+          </div>
+        </div>
+
+        {/* Metric 2: Active Jobs */}
+        <div className="bk-card p-4 sm:p-5 flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Active Jobs</span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">
+              {myBooking ? '2' : '1'}
+            </div>
+            <div className="text-[11px] text-slate-500 font-medium">
+              1 in progress, 1 scheduled
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold shrink-0">
+            <Briefcase size={18} />
+          </div>
+        </div>
+
+        {/* Metric 3: Rating */}
+        <div className="bk-card p-4 sm:p-5 flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Rating</span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-1.5">
+              <span>{currentWorker.rating || 4.8}</span>
+              <Star size={20} className="text-amber-500 fill-amber-500" />
+            </div>
+            <div className="text-[11px] text-slate-500 font-medium">
+              From {currentWorker.totalRatingsCount || 28} completed jobs
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold shrink-0">
+            <Star size={18} />
+          </div>
+        </div>
+
+        {/* Metric 4: Cooperative Share */}
+        <div className="bk-card p-4 sm:p-5 flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Cooperative Share</span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">
+              ₹{currentWorker.welfareBalance || 4320}
+            </div>
+            <div className="text-[11px] text-slate-500 font-medium">
+              Member since Jan 2025
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold shrink-0">
+            <Users size={18} />
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Navigation Tabs */}
       <div className="bg-slate-100 p-1.5 rounded-2xl flex flex-wrap items-center justify-between gap-2 border border-slate-200/80 dashboard-card" data-dashboard-card="true">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           <button
             id="tab-worker-dashboard"
             onClick={() => setPortalTab('DASHBOARD')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
               portalTab === 'DASHBOARD'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:bg-white/60'
             }`}
           >
             <Radio size={14} className={portalTab === 'DASHBOARD' ? 'text-white' : 'text-blue-600'} />
-            <span>Live Radar & Active Jobs</span>
+            <span>Dashboard</span>
           </button>
+
+          <button
+            id="tab-worker-find-work"
+            onClick={() => setPortalTab('FIND_WORK')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              portalTab === 'FIND_WORK'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-700 hover:bg-white/60'
+            }`}
+          >
+            <Search size={14} className={portalTab === 'FIND_WORK' ? 'text-white' : 'text-blue-600'} />
+            <span>Find Work</span>
+          </button>
+
           <button
             id="tab-worker-order-card"
             onClick={() => setPortalTab('ORDER_CARD')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
               portalTab === 'ORDER_CARD'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:bg-white/60'
             }`}
           >
             <ClipboardList size={14} className={portalTab === 'ORDER_CARD' ? 'text-white' : 'text-amber-600'} />
-            <span>Order Card</span>
+            <span>My Jobs</span>
             {myBooking && (
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
             )}
           </button>
+
           <button
             id="tab-worker-income-history"
             onClick={() => setPortalTab('INCOME_HISTORY')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
               portalTab === 'INCOME_HISTORY'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:bg-white/60'
             }`}
           >
             <Wallet size={14} className={portalTab === 'INCOME_HISTORY' ? 'text-white' : 'text-emerald-600'} />
-            <span>Income History</span>
+            <span>Earnings</span>
           </button>
         </div>
 
         <div className="text-xs text-slate-500 px-3 hidden md:flex items-center gap-1.5 font-medium">
           <ShieldCheck size={14} className="text-emerald-600" />
-          <span>Indore Cooperative Trade Verification</span>
+          <span>Indore Cooperative Trade Verification Active</span>
         </div>
       </div>
 
-      {/* DASHBOARD TAB VIEW */}
+      {/* DASHBOARD TAB VIEW (Desktop Mockup #4) */}
       {portalTab === 'DASHBOARD' && (
-        <>
-          {/* Active Work Order / Job Dispatch Card */}
-      {myBooking ? (
-        <section className="bg-white rounded-2xl border-2 border-blue-600 p-4 sm:p-6 shadow-md space-y-4 dashboard-card" data-dashboard-card="true">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-bold uppercase">
-                {myBooking.status.replace(/_/g, ' ')}
-              </span>
-              <h2 className="text-base font-bold text-slate-900">
-                {t('Job_Dispatch__6r0md', `Job Dispatch:`)}{myBooking.serviceName} ({myBooking.id})
-              </h2>
-            </div>
-
-            {/* Map / Dispatch Layout Switcher */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
-              <button
-                onClick={() => setWorkerMapTab('SPLIT')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
-                  workerMapTab === 'SPLIT' ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-                title={t('Side_by_side_job_actions___liv_slw5a', `Side-by-side job actions & live GPS map`)}
-              >
-                {t('__Split_View_gi9d0', `⚡ Split View`)}</button>
-              <button
-                onClick={() => setWorkerMapTab('MAP_ONLY')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
-                  workerMapTab === 'MAP_ONLY' ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-                title={t('Full_navigation_map_r76he', `Full navigation map`)}
-              >
-                {t('____Full_Map_tjaqr', `🗺️ Full Map`)}</button>
-              <button
-                onClick={() => setWorkerMapTab('DETAILS_ONLY')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
-                  workerMapTab === 'DETAILS_ONLY' ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-                title={t('Order_details_only_578pb', `Order details only`)}
-              >
-                {t('___Order_Card_3330b', `📋 Order Card`)}</button>
-            </div>
-
-            <div className="text-right">
-              <span className="text-[10px] text-slate-500">{t('Your_Share___i6g4a', `Your Share (`)}{policy.activeModel === 'MODEL_A' ? '94.5%' : '95.0%'})</span>
-              <div className="text-lg font-black text-emerald-700">
-                ₹{myBooking.pricing.workerShare}
-              </div>
-            </div>
-          </div>
-
-          {/* Customer Location & Contact Quick Summary Bar */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold text-slate-800">{t('Customer__c5lp7', `Customer:`)}{myBooking.customerName}</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-600">
-                {t('___q2vjg', `📍`)}{myBooking.customerAddress.address}, {myBooking.customerAddress.city}
-                {myBooking.customerAddress.landmark && ` (Near ${myBooking.customerAddress.landmark})`}
-              </span>
-            </div>
-            <a
-              href={`tel:${myBooking.customerPhone}`}
-              className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs"
-            >
-              <PhoneCall size={12} />
-              <span>{t('Call___ylmz7', `Call (`)}{myBooking.customerPhone})</span>
-            </a>
-          </div>
-
-          {/* Active Job Layout Options */}
-          {workerMapTab === 'MAP_ONLY' ? (
-            <div className="space-y-4">
-              <div className="h-[480px] w-full">
-                <WorkerJobMap
-                  worker={currentWorker}
-                  booking={myBooking}
-                  allWorkers={workers}
-                  onSimulateStep={simulateWorkerStep}
-                  onWorkerArrived={workerArrived}
-                  onStartJourney={startJourney}
-                />
-              </div>
-              <div>{renderBookingStateCards()}</div>
-            </div>
-          ) : workerMapTab === 'SPLIT' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              <div className="lg:col-span-5 space-y-4">
-                {renderBookingStateCards()}
-              </div>
-              <div className="lg:col-span-7 h-[480px] lg:sticky lg:top-4">
-                <WorkerJobMap
-                  worker={currentWorker}
-                  booking={myBooking}
-                  allWorkers={workers}
-                  onSimulateStep={simulateWorkerStep}
-                  onWorkerArrived={workerArrived}
-                  onStartJourney={startJourney}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4 max-w-2xl">
-              {renderBookingStateCards()}
-            </div>
-          )}
-        </section>
-      ) : (
-        /* Standby / Idle Area Coverage & Duty Radar Map Section */
-        <section className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs space-y-4 dashboard-card" data-dashboard-card="true">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                <Radio size={20} className={currentWorker.availability ? 'text-blue-600 animate-pulse' : 'text-slate-400'} />
-              </div>
-              <div>
-                <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                  <span>{t('Worker_Duty_Radar___Live_Indor_b66vw', `Worker Duty Radar & Live Indore Area Coverage`)}</span>
-                  <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                    currentWorker.availability ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {currentWorker.availability ? 'ONLINE & READY FOR JOBS' : 'OFFLINE'}
+        <div className="space-y-6">
+          {/* Active Work Order if exists */}
+          {myBooking && (
+            <section className="bg-white rounded-2xl border-2 border-blue-600 p-4 sm:p-6 shadow-md space-y-4 dashboard-card" data-dashboard-card="true">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-bold uppercase">
+                    {myBooking.status.replace(/_/g, ' ')}
                   </span>
-                </h3>
-                <p className="text-xs text-slate-500">
-                  {t('Visualizing_your_live_GPS_loca_c5c2u', `Visualizing your live GPS location in Indore, service coverage perimeter, high-demand job hubs & fellow cooperative artisans.`)}</p>
+                  <h2 className="text-base font-bold text-slate-900">
+                    Active Job: {myBooking.serviceName} ({myBooking.id})
+                  </h2>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-500">Your Share (94.5%)</span>
+                  <div className="text-lg font-black text-emerald-700">₹{myBooking.pricing.workerShare}</div>
+                </div>
+              </div>
+
+              {renderBookingStateCards()}
+            </section>
+          )}
+
+          {/* Main 3-Column Middle Grid (Mockup #4) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Column 1: Nearby Opportunities (lg:col-span-4) */}
+            <div className="lg:col-span-4 space-y-4">
+              <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900">Nearby Opportunities</h3>
+                    <p className="text-[11px] text-slate-500">Real-time jobs near you based on skills</p>
+                  </div>
+                  <button
+                    onClick={() => setPortalTab('FIND_WORK')}
+                    className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-0.5 cursor-pointer"
+                  >
+                    <span>View All</span>
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+
+                {/* Job Card 1 */}
+                <div className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-white transition-all space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                        <Zap size={16} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-xs text-slate-900">Fan Installation (2 units)</h4>
+                        <div className="text-[10px] text-slate-500 flex items-center gap-1">
+                          <MapPin size={10} />
+                          <span>1.2 km • Vijay Nagar, Indore</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-slate-900">₹600</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                      92% Match
+                    </span>
+                    <span className="text-slate-500 text-[10px]">~2 hours</span>
+                    <button
+                      onClick={() => {
+                        setSelectedJobDetails({
+                          title: 'Fan Installation (2 units)',
+                          serviceName: 'Fan Installation',
+                          location: 'Vijay Nagar, Indore',
+                          distance: '1.2 km',
+                          duration: '~2 hours',
+                          earnings: 600,
+                          trade: 'Electrical',
+                          match: '92%',
+                          customer: 'Rahul Sharma',
+                          preferredTime: 'Today, 2:00 PM - 5:00 PM',
+                          description: 'Need ceiling fan installation in 2 BHK apartment. All materials provided.',
+                        });
+                      }}
+                      className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shadow-2xs"
+                    >
+                      Accept Job
+                    </button>
+                  </div>
+                </div>
+
+                {/* Job Card 2 */}
+                <div className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-white transition-all space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <HardHat size={16} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-xs text-slate-900">Wiring Repair</h4>
+                        <div className="text-[10px] text-slate-500 flex items-center gap-1">
+                          <MapPin size={10} />
+                          <span>2.8 km • Scheme 78, Indore</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-slate-900">₹1,200</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                      86% Match
+                    </span>
+                    <span className="text-slate-500 text-[10px]">~4 hours</span>
+                    <button
+                      onClick={() => {
+                        setSelectedJobDetails({
+                          title: 'Wiring Repair',
+                          serviceName: 'Wiring Repair',
+                          location: 'Scheme 78, Indore',
+                          distance: '2.8 km',
+                          duration: '~4 hours',
+                          earnings: 1200,
+                          trade: 'Electrical',
+                          match: '86%',
+                          customer: 'Anil Gupta',
+                          preferredTime: 'Today, 3:30 PM - 7:30 PM',
+                          description: 'Short circuit fault tracing and MCB distribution board wiring repair.',
+                        });
+                      }}
+                      className="px-3 py-1 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-800 font-semibold text-[11px]"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+
+                {/* Job Card 3 */}
+                <div className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-white transition-all space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                        <Zap size={16} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-xs text-slate-900">Ceiling Fan Installation</h4>
+                        <div className="text-[10px] text-slate-500 flex items-center gap-1">
+                          <MapPin size={10} />
+                          <span>4.1 km • Palasia, Indore</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-slate-900">₹500</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 font-bold border border-blue-200">
+                      78% Match
+                    </span>
+                    <span className="text-slate-500 text-[10px]">~2 hours</span>
+                    <button
+                      onClick={() => {
+                        setSelectedJobDetails({
+                          title: 'Ceiling Fan Installation',
+                          serviceName: 'Ceiling Fan Installation',
+                          location: 'Palasia, Indore',
+                          distance: '4.1 km',
+                          duration: '~2 hours',
+                          earnings: 500,
+                          trade: 'Electrical',
+                          match: '78%',
+                          customer: 'Siddharth Rao',
+                          preferredTime: 'Tomorrow, 10:00 AM',
+                          description: 'Standard ceiling fan unboxing and secure anchor mounting in living room.',
+                        });
+                      }}
+                      className="px-3 py-1 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-800 font-semibold text-[11px]"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => toggleWorkerAvailability(currentWorker.id)}
-                disabled={currentWorker.verificationStatus !== 'VERIFIED'}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                  currentWorker.availability
-                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
-                }`}
-              >
-                {currentWorker.availability ? 'Pause / Go Offline' : 'Activate Live Duty'}
-              </button>
+            {/* Column 2: Jobs Near You Interactive Map (lg:col-span-5) */}
+            <div className="lg:col-span-5 space-y-3">
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-sm text-slate-900">Jobs Near You</h3>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                      Indore Zone
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-500 font-medium">All Jobs</span>
+                </div>
+
+                <div className="h-[340px] w-full rounded-xl overflow-hidden border border-slate-200">
+                  <WorkerJobMap
+                    worker={currentWorker}
+                    allWorkers={workers}
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600 pt-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span>Available Job</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                    <span>In Progress</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                    <span>Urgent</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600 ring-2 ring-blue-300" />
+                    <span>Your Location</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Column 3: Your Next Job & Cooperative Benefits (lg:col-span-3) */}
+            <div className="lg:col-span-3 space-y-4">
+              {/* Your Next Job Card */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-xs text-slate-900">Your Next Job</h3>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                    Confirmed
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold">
+                    <Zap size={16} />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs text-slate-900">AC Repair & Filter Clean</div>
+                    <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                      <Clock size={10} />
+                      <span>Today, 3:00 PM</span>
+                    </div>
+                    <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                      <MapPin size={10} />
+                      <span>Vijay Nagar, Indore</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setPortalTab('ORDER_CARD')}
+                  className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition-colors"
+                >
+                  View Job Details
+                </button>
+              </div>
+
+              {/* Cooperative Benefits Card */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-xs text-slate-900">Cooperative Benefits</h3>
+                  <button
+                    onClick={() => setPortalTab('INCOME_HISTORY')}
+                    className="text-[11px] font-bold text-blue-600 hover:underline"
+                  >
+                    View All
+                  </button>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck size={14} className="text-emerald-600" />
+                      <span className="font-medium text-slate-800">Health Insurance</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50">
+                    <div className="flex items-center gap-2">
+                      <Award size={14} className="text-blue-600" />
+                      <span className="font-medium text-slate-800">Skill Development</span>
+                    </div>
+                    <button
+                      onClick={() => setIsSkillAssessmentOpen(true)}
+                      className="text-[10px] font-bold text-blue-700 hover:underline"
+                    >
+                      Enroll
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50">
+                    <div className="flex items-center gap-2">
+                      <HeartHandshake size={14} className="text-purple-600" />
+                      <span className="font-medium text-slate-800">Welfare Fund</span>
+                    </div>
+                    <span className="text-[11px] font-bold text-purple-800">
+                      ₹{currentWorker.welfareBalance || 4320}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50">
+                    <div className="flex items-center gap-2">
+                      <HardHat size={14} className="text-amber-600" />
+                      <span className="font-medium text-slate-800">Tools Support</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-amber-700">
+                      Apply
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="h-[430px] w-full">
-            <WorkerJobMap
-              worker={currentWorker}
-              allWorkers={workers}
-            />
+          {/* Bottom 3-Column Grid (Mockup #4) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Column 1: Today's Schedule Timeline */}
+            <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-sm text-slate-900">Today&apos;s Schedule</h3>
+                <span className="text-xs font-bold text-blue-600 cursor-pointer">View Full Day</span>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                {/* Schedule Item 1 */}
+                <div className="flex items-start gap-3 relative">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check size={12} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900">AC Repair</span>
+                      <span className="font-bold text-slate-800">₹1,200</span>
+                    </div>
+                    <div className="text-[11px] text-slate-500">Completed • 10:00 AM - 12:00 PM</div>
+                  </div>
+                </div>
+
+                {/* Schedule Item 2 */}
+                <div className="flex items-start gap-3 relative">
+                  <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <Zap size={12} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900">Wiring at Sharma Residence</span>
+                      <span className="font-bold text-slate-800">₹650</span>
+                    </div>
+                    <div className="text-[11px] text-blue-600 font-medium">In Progress • 1:00 PM - 3:00 PM</div>
+                  </div>
+                </div>
+
+                {/* Schedule Item 3 */}
+                <div className="flex items-start gap-3 relative">
+                  <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 mt-0.5">
+                    <Clock size={12} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900">LED Installation</span>
+                      <span className="font-bold text-slate-800">₹500</span>
+                    </div>
+                    <div className="text-[11px] text-slate-500">Scheduled • 5:00 PM - 7:00 PM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Column 2: Earnings Overview Weekly Bar Chart */}
+            <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">Earnings Overview</h3>
+                  <p className="text-[11px] text-slate-500">Weekly breakdown</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-black text-slate-900">₹2,450</span>
+                  <div className="text-[10px] text-slate-500">5 jobs this week</div>
+                </div>
+              </div>
+
+              {/* Simplified weekly bar visualization (Mon to Sun) */}
+              <div className="pt-2 flex items-end justify-between h-32 gap-2 text-center">
+                {[
+                  { day: 'Mon', h: '35%', val: '₹400' },
+                  { day: 'Tue', h: '55%', val: '₹650' },
+                  { day: 'Wed', h: '45%', val: '₹500' },
+                  { day: 'Thu', h: '65%', val: '₹750' },
+                  { day: 'Fri', h: '90%', val: '₹1,200', active: true },
+                  { day: 'Sat', h: '50%', val: '₹600' },
+                  { day: 'Sun', h: '70%', val: '₹850' },
+                ].map((item, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group cursor-pointer">
+                    <div
+                      style={{ height: item.h }}
+                      className={`w-full rounded-t-lg transition-all ${
+                        item.active ? 'bg-blue-600' : 'bg-blue-200 hover:bg-blue-300'
+                      }`}
+                      title={`${item.day}: ${item.val}`}
+                    />
+                    <span className="text-[10px] text-slate-500 font-medium">{item.day}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 3: Recent Messages with Unread Counter */}
+            <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-sm text-slate-900">Recent Messages</h3>
+                <span className="text-xs font-bold text-blue-600 cursor-pointer">View All</span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center shrink-0">
+                    AY
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900 truncate">Amit Yadav (Customer)</span>
+                      <span className="text-[10px] text-slate-400">10m ago</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 truncate mt-0.5">Can you come 15 mins earlier?</p>
+                  </div>
+                  <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1" />
+                </div>
+
+                <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center shrink-0">
+                    BK
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900 truncate">Bharat Kaushal</span>
+                      <span className="text-[10px] text-slate-400">2h ago</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 truncate mt-0.5">Your welfare benefit credit ₹48 has been updated.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center shrink-0">
+                    SA
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900 truncate">Society Admin</span>
+                      <span className="text-[10px] text-slate-400">5h ago</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 truncate mt-0.5">New maintenance task batch available in Scheme 78.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FIND WORK MARKETPLACE TAB VIEW (Mockup #1 Screen 4) */}
+      {portalTab === 'FIND_WORK' && (
+        <section className="space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-black text-slate-900">Find Work Marketplace</h2>
+                <p className="text-xs text-slate-500">Real opportunities across Indore with verified cooperative realization</p>
+              </div>
+
+              <div className="relative w-full sm:w-72">
+                <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search trade, skill, or location..."
+                  className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Filter Chips */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+              {['All', 'Electrical', 'Plumbing', 'Carpentry', 'Painting', 'AC Repair'].map((cat, idx) => (
+                <button
+                  key={idx}
+                  className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-colors ${
+                    idx === 0 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Job Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { title: 'LED Light Installation', loc: 'Palasia, Indore', dist: '1.2 km', dur: '~2 hours', price: 500, match: '78%', trade: 'Electrical' },
+              { title: 'AC Repair & Gas Refill', loc: 'Vijay Nagar, Indore', dist: '2.4 km', dur: '~3 hours', price: 1500, match: '88%', trade: 'HVAC' },
+              { title: 'Switch Board Repair', loc: 'Lal Bagh, Indore', dist: '3.1 km', dur: '~2 hours', price: 700, match: '80%', trade: 'Electrical' },
+              { title: 'Ceiling Fan Installation', loc: 'Bhawarkuan, Indore', dist: '4.0 km', dur: '~2 hours', price: 600, match: '76%', trade: 'Electrical' },
+              { title: 'Water Tank Leakage Fix', loc: 'Rajwada, Indore', dist: '1.8 km', dur: '~2.5 hours', price: 850, match: '84%', trade: 'Plumbing' },
+              { title: 'Door Lock Replacement', loc: 'Geeta Bhawan, Indore', dist: '3.5 km', dur: '~1.5 hours', price: 450, match: '82%', trade: 'Carpentry' },
+            ].map((job, idx) => (
+              <div key={idx} className="bk-card p-4 space-y-3 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700">
+                      {job.trade}
+                    </span>
+                    <button className="text-slate-400 hover:text-rose-500">
+                      <Heart size={16} />
+                    </button>
+                  </div>
+
+                  <h3 className="font-bold text-sm text-slate-900">{job.title}</h3>
+
+                  <div className="text-xs text-slate-500 flex items-center gap-1.5">
+                    <MapPin size={12} className="text-slate-400" />
+                    <span>{job.loc} • {job.dist}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <span className="text-base font-black text-slate-900">₹{job.price}</span>
+                    <span className="text-[11px] text-slate-500">{job.dur}</span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    {job.match} Match
+                  </span>
+
+                  <button
+                    onClick={() => {
+                      setSelectedJobDetails({
+                        title: job.title,
+                        serviceName: job.title,
+                        location: job.loc,
+                        distance: job.dist,
+                        duration: job.dur,
+                        earnings: job.price,
+                        trade: job.trade,
+                        match: job.match,
+                        customer: 'Verified Customer',
+                        preferredTime: 'Today, 2:00 PM - 5:00 PM',
+                        description: `Standard cooperative task requirement for ${job.title} in Indore. Full equipment support provided.`,
+                      });
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-2xs"
+                  >
+                    Accept Job
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       )}
 
-      {/* Worker Financials & Welfare Fund Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 dashboard-card" data-dashboard-card="true">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
-          <div className="text-xs font-medium text-slate-500">{t('Today_apos_s_Earnings__94_5___san2c', `Today&apos;s Earnings (94.5%)`)}</div>
-          <div className="text-2xl font-black text-slate-900">₹{currentWorker.earnings?.today ?? 0}</div>
-          <div className="text-[11px] text-emerald-600 font-medium">{t('Direct_UPI_settlement_8sawh', `Direct UPI settlement`)}</div>
-        </div>
+      {/* Job Details Modal (Mockup #1 Screen 5) */}
+      {selectedJobDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
+                  {selectedJobDetails.trade}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold">
+                  {selectedJobDetails.match} Match
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedJobDetails(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
+              >
+                <X size={16} />
+              </button>
+            </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
-          <div className="text-xs font-medium text-slate-500">{t('This_Month_apos_s_Earnings_w8f2v', `This Month&apos;s Earnings`)}</div>
-          <div className="text-2xl font-black text-slate-900">₹{currentWorker.earnings?.thisMonth ?? 0}</div>
-          <div className="text-[11px] text-slate-500">{t('Lifetime____agmrd', `Lifetime: ₹`)}{currentWorker.earnings?.total ?? 0}</div>
-        </div>
+            <div className="space-y-1">
+              <h3 className="text-xl font-black text-slate-900">{selectedJobDetails.title}</h3>
+              <div className="text-xs text-slate-500 flex items-center gap-2">
+                <MapPin size={13} className="text-blue-600" />
+                <span>{selectedJobDetails.distance} • {selectedJobDetails.location}</span>
+              </div>
+            </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
-          <div className="text-xs font-medium text-slate-500 flex items-center gap-1">
-            <Building2 size={13} className="text-blue-600" />
-            <span>{t('Labour_Welfare_Fund__2___y6z70', `Labour Welfare Fund (2%)`)}</span>
-          </div>
-          <div className="text-2xl font-black text-blue-700">₹{currentWorker.welfareBalance ?? 0}</div>
-          <div className="text-[11px] text-slate-500">{t('MP_Social_Security_Fund__MPSLW_mm1dq', `MP Social Security Fund (MPSLWB)`)}</div>
-        </div>
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div>
+                <span className="text-xs text-slate-500">Estimated Earnings (94.5%)</span>
+                <div className="text-2xl font-black text-emerald-700">₹{selectedJobDetails.earnings}</div>
+              </div>
+              <div className="text-right text-xs text-slate-600">
+                <div>Duration: <strong>{selectedJobDetails.duration}</strong></div>
+                <div className="text-slate-400 text-[11px]">Preferred: {selectedJobDetails.preferredTime}</div>
+              </div>
+            </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1 flex flex-col justify-between">
-          <div>
-            <div className="text-xs font-medium text-slate-500">{t('Penalty_Status_kcaby', `Penalty Status`)}</div>
-            <div className="text-sm font-bold text-slate-900 mt-0.5">
-              {currentWorker.penaltyStatus === 'NONE' ? (
-                <span className="text-emerald-700">{t('Zero_Penalties_Active_6oi9k', `Zero Penalties Active`)}</span>
-              ) : (
-                <span className="text-rose-600">{currentWorker.penaltyStatus}</span>
-              )}
+            <div className="space-y-2 text-xs text-slate-700">
+              <div className="font-bold text-slate-900">Job Description:</div>
+              <p className="leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                {selectedJobDetails.description}
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center gap-3">
+              <button
+                onClick={() => {
+                  alert(`Job "${selectedJobDetails.title}" accepted! Transitioning to live navigation.`);
+                  setSelectedJobDetails(null);
+                  setPortalTab('DASHBOARD');
+                }}
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md transition-all text-center cursor-pointer"
+              >
+                Accept Job
+              </button>
+              <button
+                onClick={() => setSelectedJobDetails(null)}
+                className="px-5 py-3 border border-slate-300 hover:bg-slate-100 rounded-xl font-semibold text-xs text-slate-700"
+              >
+                Cancel
+              </button>
             </div>
           </div>
-          <button
-            onClick={() => setIsAppealModalOpen(true)}
-            className="w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition-colors text-center"
-          >
-            {t('Submit_Penalty_Appeal_eb83w', `Submit Penalty Appeal`)}</button>
         </div>
-      </section>
+      )}
 
       {/* Welfare & Benefits Summary Panel (MPSLWB & Social Security Projections) */}
       <WorkerWelfareBenefitsPanel lang={lang} />
@@ -846,7 +1291,6 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
         workerId={currentWorker.id}
         onClose={() => setIsSkillAssessmentOpen(false)}
         onComplete={(res) => {
-          // Update in-memory worker profile if available
           if (currentWorker) {
             currentWorker.skillAssessmentScore = res.percentage;
             currentWorker.skillLevel = res.skillLevel as any;
@@ -950,8 +1394,6 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
             </div>
           </div>
         </div>
-      )}
-        </>
       )}
 
       {/* ORDER CARD TAB VIEW */}

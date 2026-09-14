@@ -40,6 +40,9 @@ interface HeaderProps {
   lang: SupportedLanguage;
   onSelectLang: (lang: SupportedLanguage) => void;
   onOpenBenchmark: () => void;
+  currentView?: 'LANDING' | 'PORTAL';
+  onNavigateHome?: () => void;
+  onOpenUnifiedAuth?: (role?: UserRole) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -48,6 +51,9 @@ export const Header: React.FC<HeaderProps> = ({
   lang,
   onSelectLang,
   onOpenBenchmark,
+  currentView = 'PORTAL',
+  onNavigateHome,
+  onOpenUnifiedAuth,
 }) => {
   const { connectionStatus, notifications, resetDemo, bookings } = useRealtime();
   const {
@@ -347,7 +353,18 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 relative">
         {/* Brand Logo & Mobile Quick Controls */}
         <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-3 sm:gap-4">
-          <BharatKaushalLogo size="md" inline={true} showTagline={false} />
+          {onNavigateHome ? (
+            <button
+              id="btn-header-logo-home"
+              onClick={onNavigateHome}
+              className="cursor-pointer text-left focus:outline-none hover:opacity-90 transition-opacity"
+              title="Return to Bharat Kaushal Home"
+            >
+              <BharatKaushalLogo size="md" inline={true} showTagline={false} />
+            </button>
+          ) : (
+            <BharatKaushalLogo size="md" inline={true} showTagline={false} />
+          )}
           
           {/* Mobile Quick Controls: Uniform touch targets, zero layout shift */}
           <div className="flex md:hidden items-center gap-1.5 shrink-0">
@@ -414,11 +431,25 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Multi-role Navigation Tabs */}
         <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
+          {onNavigateHome && (
+            <button
+              id="nav-role-home"
+              onClick={onNavigateHome}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+                currentView === 'LANDING'
+                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
+              }`}
+            >
+              <span>{t('Home', 'Home')}</span>
+            </button>
+          )}
+
           <button
             id="nav-role-customer"
             onClick={() => onSelectRole('CUSTOMER')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
-              currentRole === 'CUSTOMER'
+              currentRole === 'CUSTOMER' && currentView !== 'LANDING'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}

@@ -10,6 +10,9 @@ import { SuperAdminPortal } from './components/admin/SuperAdminPortal';
 import { DatasetBenchmarkModal } from './components/benchmark/DatasetBenchmarkModal';
 import { BharatKaushalCare } from './components/chatbot/BharatKaushalCare';
 import { AuthModalsContainer } from './components/auth/AuthModalsContainer';
+import { LandingPage } from './components/landing/LandingPage';
+import { UnifiedAuthExperience } from './components/auth/UnifiedAuthExperience';
+import { MobileNavigation } from './components/common/MobileNavigation';
 import { SupportedLanguage } from './utils/i18n';
 import {
   ShieldCheck,
@@ -81,9 +84,12 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 }
 
 function MainAppContent() {
+  const [currentView, setCurrentView] = useState<'LANDING' | 'PORTAL'>('LANDING');
   const [currentRole, setCurrentRole] = useState<UserRole>('CUSTOMER');
   const [lang, setLang] = useState<SupportedLanguage>('en');
   const [isBenchmarkOpen, setIsBenchmarkOpen] = useState(false);
+  const [isUnifiedAuthOpen, setIsUnifiedAuthOpen] = useState(false);
+  const [unifiedAuthRole, setUnifiedAuthRole] = useState<UserRole>('CUSTOMER');
   const { toasts, dismissToast } = useRealtime();
 
   const isPricingDatasetAllowed = ['SOCIETY_ADMIN', 'FEDERATION_ADMIN', 'SUPER_ADMIN'].includes(currentRole);
@@ -129,7 +135,7 @@ function MainAppContent() {
 
 
   return (
-    <div className="min-h-screen bg-slate-100/60 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-slate-100/60 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 pb-16 sm:pb-0">
       {/* Toast Notification Container */}
       <div className="fixed top-14 right-4 z-[80] flex flex-col gap-2 max-w-sm pointer-events-none">
         {toasts.map((t) => (
@@ -162,35 +168,68 @@ function MainAppContent() {
       {/* Global Header */}
       <Header
         currentRole={currentRole}
-        onSelectRole={setCurrentRole}
+        onSelectRole={(role) => {
+          setCurrentRole(role);
+          setCurrentView('PORTAL');
+        }}
         lang={lang}
         onSelectLang={setLang}
         onOpenBenchmark={handleOpenBenchmark}
+        currentView={currentView}
+        onNavigateHome={() => setCurrentView('LANDING')}
+        onOpenUnifiedAuth={(role) => {
+          setUnifiedAuthRole(role || currentRole);
+          setIsUnifiedAuthOpen(true);
+        }}
       />
 
-      {/* Main Workspace Body */}
-      {currentRole === 'SUPER_ADMIN' ? (
-        <main className="flex-1 w-full dashboard-container" data-dashboard-container="true">
-          <SuperAdminPortal />
-        </main>
+      {/* View Switcher: Landing Page vs Portal Views */}
+      {currentView === 'LANDING' ? (
+        <LandingPage
+          lang={lang}
+          onSelectLang={setLang}
+          onSelectRole={(role) => {
+            setCurrentRole(role);
+            setCurrentView('PORTAL');
+          }}
+          onOpenAuth={(role) => {
+            setUnifiedAuthRole(role || 'CUSTOMER');
+            setIsUnifiedAuthOpen(true);
+          }}
+          onOpenCustomerBooking={() => {
+            setCurrentRole('CUSTOMER');
+            setCurrentView('PORTAL');
+          }}
+          onOpenWorkerMarketplace={() => {
+            setCurrentRole('WORKER');
+            setCurrentView('PORTAL');
+          }}
+        />
       ) : (
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6 dashboard-container" data-dashboard-container="true">
-          {currentRole === 'CUSTOMER' && (
-            <CustomerPortal lang={lang} />
-          )}
+        /* Main Workspace Body */
+        currentRole === 'SUPER_ADMIN' ? (
+          <main className="flex-1 w-full dashboard-container" data-dashboard-container="true">
+            <SuperAdminPortal />
+          </main>
+        ) : (
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6 dashboard-container" data-dashboard-container="true">
+            {currentRole === 'CUSTOMER' && (
+              <CustomerPortal lang={lang} />
+            )}
 
-          {currentRole === 'WORKER' && (
-            <WorkerPortal lang={lang} />
-          )}
+            {currentRole === 'WORKER' && (
+              <WorkerPortal lang={lang} />
+            )}
 
-          {currentRole === 'SOCIETY_ADMIN' && (
-            <SocietyAdminPortal lang={lang} />
-          )}
+            {currentRole === 'SOCIETY_ADMIN' && (
+              <SocietyAdminPortal lang={lang} />
+            )}
 
-          {currentRole === 'FEDERATION_ADMIN' && (
-            <FederationCommandPortal lang={lang} />
-          )}
-        </main>
+            {currentRole === 'FEDERATION_ADMIN' && (
+              <FederationCommandPortal lang={lang} />
+            )}
+          </main>
+        )
       )}
 
       {/* Floating AI & Helpline Chatbot */}
@@ -209,6 +248,30 @@ function MainAppContent() {
 
       {/* Role-Specific Authentication Modals */}
       <AuthModalsContainer />
+
+      {/* Mobile Persistent Navigation Bar (< 640px) */}
+      <MobileNavigation
+        currentRole={currentRole}
+        onSelectRole={(role) => {
+          setCurrentRole(role);
+          setCurrentView('PORTAL');
+        }}
+        lang={lang}
+      />
+
+      {/* Unified Multi-Role Auth Experience Modal */}
+      <UnifiedAuthExperience
+        isOpen={isUnifiedAuthOpen}
+        onClose={() => setIsUnifiedAuthOpen(false)}
+        initialRole={unifiedAuthRole}
+        lang={lang}
+        onSelectLang={setLang}
+        onSuccess={() => {
+          setIsUnifiedAuthOpen(false);
+          setCurrentRole(unifiedAuthRole);
+          setCurrentView('PORTAL');
+        }}
+      />
 
       {/* Statutory Footer */}
       <footer className="bg-white border-t border-slate-200 mt-12 text-xs text-slate-500 py-8">
