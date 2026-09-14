@@ -1,4 +1,6 @@
 import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
 import http from 'http';
 import path from 'path';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -57,7 +59,7 @@ function getGeminiClient(): GoogleGenAI | null {
   return geminiClient;
 }
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3001;
 const app = express();
 app.use(express.json());
 
