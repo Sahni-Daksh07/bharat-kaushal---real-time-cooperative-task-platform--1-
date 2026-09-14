@@ -350,22 +350,20 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 sm:gap-3 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 relative">
         {/* Brand Logo & Mobile Quick Controls */}
-        <div className="w-full lg:w-auto flex items-center justify-between lg:justify-start gap-2 sm:gap-4 shrink-0">
+        <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-3 sm:gap-4">
           {onNavigateHome ? (
             <button
               id="btn-header-logo-home"
               onClick={onNavigateHome}
-              className="cursor-pointer text-left focus:outline-none hover:opacity-90 transition-opacity shrink-0"
+              className="cursor-pointer text-left focus:outline-none hover:opacity-90 transition-opacity"
               title="Return to Bharat Kaushal Home"
             >
               <BharatKaushalLogo size="md" inline={true} showTagline={false} />
             </button>
           ) : (
-            <div className="shrink-0">
-              <BharatKaushalLogo size="md" inline={true} showTagline={false} />
-            </div>
+            <BharatKaushalLogo size="md" inline={true} showTagline={false} />
           )}
           
           {/* Mobile Quick Controls: Uniform touch targets, zero layout shift */}
@@ -431,13 +429,13 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Multi-role Navigation Tabs - Responsively auto-adjusts across tablets & desktops */}
-        <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold overflow-x-auto no-scrollbar max-w-full shrink">
+        {/* Multi-role Navigation Tabs */}
+        <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
           {onNavigateHome && (
             <button
               id="nav-role-home"
               onClick={onNavigateHome}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
                 currentView === 'LANDING'
                   ? 'bg-blue-600 text-white shadow-xs font-bold'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
@@ -450,7 +448,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="nav-role-customer"
             onClick={() => onSelectRole('CUSTOMER')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
               currentRole === 'CUSTOMER' && currentView !== 'LANDING'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
@@ -463,57 +461,53 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="nav-role-worker"
             onClick={() => onSelectRole('WORKER')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
               currentRole === 'WORKER'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
             <HardHat size={14} />
-            <span className="hidden xl:inline">{t('worker', 'Cooperative Worker')}</span>
-            <span className="xl:hidden">{t('worker_short', 'Worker')}</span>
+            <span>{t('worker', 'Cooperative Worker')}</span>
           </button>
 
           <button
             id="nav-role-society"
             onClick={() => onSelectRole('SOCIETY_ADMIN')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
               currentRole === 'SOCIETY_ADMIN'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
             <Building2 size={14} />
-            <span className="hidden xl:inline">{t('societyAdmin', 'Society Admin')}</span>
-            <span className="xl:hidden">{t('society_short', 'Society')}</span>
+            <span>{t('societyAdmin', 'Society Admin')}</span>
           </button>
 
           <button
             id="nav-role-federation"
             onClick={() => onSelectRole('FEDERATION_ADMIN')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
               currentRole === 'FEDERATION_ADMIN'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
             <Sliders size={14} />
-            <span className="hidden xl:inline">{t('federationAdmin', 'Federation Command')}</span>
-            <span className="xl:hidden">{t('federation_short', 'Federation')}</span>
+            <span>{t('federationAdmin', 'Federation Command')}</span>
           </button>
 
           <button
             id="nav-role-super-admin"
             onClick={() => onSelectRole('SUPER_ADMIN')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all font-bold shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all font-bold ${
               currentRole === 'SUPER_ADMIN'
                 ? 'bg-amber-600 text-white shadow-xs'
                 : 'text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200'
             }`}
           >
             <Shield size={14} className={currentRole === 'SUPER_ADMIN' ? 'text-white' : 'text-amber-600'} />
-            <span className="hidden xl:inline">{t('Super_Admin_d4d1r', `Super Admin`)}</span>
-            <span className="xl:hidden">{t('super_admin_short', 'Admin')}</span>
+            <span>{t('Super_Admin_d4d1r', `Super Admin`)}</span>
             <span className="text-[9px] bg-amber-200 text-amber-950 px-1 rounded uppercase tracking-wider font-mono">
               {t('Govt_2ti61', `Govt`)}</span>
           </button>
