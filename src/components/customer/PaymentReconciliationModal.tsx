@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRealtime } from '../../context/RealtimeContext';
 import { Booking, PaymentMethodType } from '../../types';
 import { SupportedLanguage, getTranslation } from '../../utils/i18n';
 import {
@@ -38,6 +39,7 @@ export const PaymentReconciliationModal: React.FC<PaymentReconciliationModalProp
   onPaymentSuccess,
   lang = 'en',
 }) => {
+  const { processPayment } = useRealtime();
   if (!isOpen || !booking) return null;
 
   const t = (key: string, fallback?: string) => getTranslation(lang, key, fallback);
@@ -128,23 +130,13 @@ export const PaymentReconciliationModal: React.FC<PaymentReconciliationModalProp
       setProcessingState('RECONCILING');
       setGatewayStepText('Generating cash reconciliation voucher & auditing cooperative ledger...');
       try {
-        const res = await fetch(`/api/bookings/${booking.id}/pay`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            method: 'CASH',
-            cashTendered,
-            cashChangeReturned: cashChange,
-            notes: `Cash on service collected by artisan ${booking.workerName || 'worker'}. Change: ₹${cashChange}`,
-          }),
+        const updated = await processPayment(booking.id, {
+          method: 'CASH',
+          cashTendered,
+          cashChangeReturned: cashChange,
+          notes: `Cash on service collected by artisan ${booking.workerName || 'worker'}. Change: ₹${cashChange}`,
         });
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || 'Reconciliation failed');
-        }
-
-        const updated = await res.json();
         setProcessingState('SUCCESS');
         setTimeout(() => {
           onPaymentSuccess(updated);
@@ -183,22 +175,12 @@ export const PaymentReconciliationModal: React.FC<PaymentReconciliationModalProp
               bank: activeTab === 'DEBIT_CARD' ? selectedBank : undefined,
             };
 
-      const res = await fetch(`/api/bookings/${booking.id}/pay`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          method: activeTab,
-          details,
-          notes: `Authorized via ${activeTab} with reference bank authorization switch.`,
-        }),
+      const updated = await processPayment(booking.id, {
+        method: activeTab,
+        details,
+        notes: `Authorized via ${activeTab} with reference bank authorization switch.`,
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Reconciliation failed');
-      }
-
-      const updated = await res.json();
       setProcessingState('SUCCESS');
       setTimeout(() => {
         onPaymentSuccess(updated);

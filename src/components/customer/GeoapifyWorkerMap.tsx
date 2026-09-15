@@ -21,6 +21,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { WorkerProfile } from '../../types';
+import { getEffectiveGeoapifyKey, maskGeoapifyKey } from '../../utils/geoapifyConfig';
 
 export interface WorkerWithDistance extends WorkerProfile {
   distanceKm: number;
@@ -76,16 +77,9 @@ export function GeoapifyWorkerMap({
   onLocateUser,
   maxRadiusKm,
 }: GeoapifyWorkerMapProps) {
-  // Read configured Geoapify API key from environment or localStorage
+  // Read configured Geoapify API key from environment, localStorage, or obfuscated fallback
   const envKey: string = (import.meta as any).env?.VITE_GEOAPIFY_API_KEY || '';
-  const [activeKey, setActiveKey] = useState<string>(() => {
-    if (envKey) return envKey;
-    try {
-      return localStorage.getItem('GEOAPIFY_API_KEY') || '';
-    } catch {
-      return '';
-    }
-  });
+  const [activeKey, setActiveKey] = useState<string>(() => getEffectiveGeoapifyKey());
 
   const [inputKey, setInputKey] = useState('');
   const [showKeyModal, setShowKeyModal] = useState(false);
@@ -441,7 +435,7 @@ export function GeoapifyWorkerMap({
             <div className="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl shadow-md border border-slate-700/80 text-[11px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               <span className="font-semibold text-slate-300">
-                {envKey ? 'Env Key' : 'Geoapify'}
+                Geoapify: <code className="font-mono text-emerald-400">{maskGeoapifyKey(activeKey)}</code>
               </span>
               <button
                 onClick={() => setShowKeyModal(true)}
@@ -510,7 +504,7 @@ export function GeoapifyWorkerMap({
               <div className="flex gap-2">
                 <input
                   id="geoapify-key-input"
-                  type="text"
+                  type="password"
                   value={inputKey}
                   onChange={(e) => {
                     setInputKey(e.target.value);
@@ -536,8 +530,8 @@ export function GeoapifyWorkerMap({
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span className="text-slate-500 text-[11px]">
                   {t('Active__zemkt', `Active:`)}{' '}
-                  <code className="font-mono">
-                    {activeKey.slice(0, 6)}{t('____zystz', `...`)}{activeKey.slice(-4)}
+                  <code className="font-mono text-slate-700">
+                    {maskGeoapifyKey(activeKey)}
                   </code>
                 </span>
                 <button
@@ -599,7 +593,7 @@ export function GeoapifyWorkerMap({
               <div className="flex gap-2">
                 <input
                   id="zero-geoapify-key"
-                  type="text"
+                  type="password"
                   value={inputKey}
                   onChange={(e) => {
                     setInputKey(e.target.value);

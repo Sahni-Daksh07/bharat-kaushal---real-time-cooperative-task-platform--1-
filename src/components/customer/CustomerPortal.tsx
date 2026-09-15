@@ -229,14 +229,20 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({ lang }) => {
     setIsSubmittingBooking(true);
     setTeamUnavailableError(null);
     try {
-      const address = effectiveCustomer.addresses[selectedAddressIndex] || effectiveCustomer.addresses[0];
+      const address =
+        (effectiveCustomer?.addresses && effectiveCustomer.addresses[selectedAddressIndex]) ||
+        (effectiveCustomer?.addresses && effectiveCustomer.addresses[0]) ||
+        currentCustomer.addresses[0];
       await createBooking(
         selectedService.record_id,
         address,
         scopeDetails,
-        preselectedWorker?.id
+        preselectedWorker?.id,
+        effectiveCustomer
       );
       setIsBookingModalOpen(false);
+      setPreselectedWorker(null);
+      setScopeDetails({});
     } catch (e: any) {
       console.error('Booking failed', e);
       if (e?.response?.data?.isTeamUnavailable || e?.data?.isTeamUnavailable) {

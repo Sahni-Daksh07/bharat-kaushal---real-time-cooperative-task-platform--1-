@@ -643,10 +643,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <HardHat size={14} className="shrink-0" />
-            <span>
-              <span className="hidden xl:inline">{t('cooperative', 'Cooperative')} </span>
-              {t('worker', 'Worker')}
-            </span>
+            <span>{t('worker', 'Cooperative Worker')}</span>
           </button>
 
           <button

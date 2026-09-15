@@ -19,6 +19,7 @@ import {
   Compass,
 } from 'lucide-react';
 import { WorkerProfile, Booking } from '../../types';
+import { getEffectiveGeoapifyKey, maskGeoapifyKey } from '../../utils/geoapifyConfig';
 
 interface WorkerJobMapProps {
   worker: WorkerProfile;
@@ -68,16 +69,9 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
   onWorkerArrived,
   onStartJourney,
 }) => {
-  // Geoapify Key from env or localStorage
+  // Geoapify Key from env, localStorage, or obfuscated fallback
   const envKey: string = (import.meta as any).env?.VITE_GEOAPIFY_API_KEY || '';
-  const [activeKey, setActiveKey] = useState<string>(() => {
-    if (envKey) return envKey;
-    try {
-      return localStorage.getItem('GEOAPIFY_API_KEY') || '';
-    } catch {
-      return '';
-    }
-  });
+  const [activeKey, setActiveKey] = useState<string>(() => getEffectiveGeoapifyKey());
 
   const [inputKey, setInputKey] = useState('');
   const [keyError, setKeyError] = useState('');
@@ -488,7 +482,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
             <div className="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl shadow-md border border-slate-700/80 text-[11px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               <span className="font-semibold text-slate-300">
-                {envKey ? 'Env Key' : 'Geoapify'}
+                Geoapify: <code className="font-mono text-emerald-400">{maskGeoapifyKey(activeKey)}</code>
               </span>
               <button
                 onClick={() => setShowKeyModal(true)}
@@ -658,7 +652,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
               <div className="flex gap-2">
                 <input
                   id="worker-geoapify-key"
-                  type="text"
+                  type="password"
                   value={inputKey}
                   onChange={(e) => {
                     setInputKey(e.target.value);
@@ -682,7 +676,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
             {activeKey && (
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span className="text-slate-500 text-[11px]">
-                  {t('Active__7uyz1', `Active:`)}<code className="font-mono">{activeKey.slice(0, 6)}{t('____4x9o0', `...`)}{activeKey.slice(-4)}</code>
+                  {t('Active__7uyz1', `Active:`)}<code className="font-mono text-slate-700">{maskGeoapifyKey(activeKey)}</code>
                 </span>
                 <button
                   onClick={handleClearKey}
@@ -716,7 +710,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
               <div className="flex gap-2">
                 <input
                   id="worker-zero-key"
-                  type="text"
+                  type="password"
                   value={inputKey}
                   onChange={(e) => {
                     setInputKey(e.target.value);
