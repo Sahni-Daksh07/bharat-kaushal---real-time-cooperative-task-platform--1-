@@ -148,12 +148,50 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // Connect WebSocket
+  // Connect WebSocket with robust reconnection
   useEffect(() => {
     let active = true;
+    let retryCount = 0;
+    const MAX_RETRIES = 50;
+    const BASE_DELAY = 1000;
+    const MAX_DELAY = 30000;
+    let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+
+    function getBackoffDelay() {
+      // Exponential backoff with jitter: min(BASE * 2^retry + jitter, MAX)
+      const exponential = Math.min(BASE_DELAY * Math.pow(2, retryCount), MAX_DELAY);
+      const jitter = Math.random() * 500;
+      return exponential + jitter;
+    }
+
+    function startHeartbeat(ws: WebSocket) {
+      stopHeartbeat();
+      heartbeatInterval = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          try {
+            ws.send(JSON.stringify({ event: 'PING' }));
+          } catch {
+            // Socket broken, will be caught by onerror/onclose
+          }
+        }
+      }, 25000); // ping every 25s to keep connection alive
+    }
+
+    function stopHeartbeat() {
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+      }
+    }
 
     function connect() {
       if (!active) return;
+      if (retryCount >= MAX_RETRIES) {
+        console.warn('WebSocket: max reconnection attempts reached, stopping.');
+        setConnectionStatus('DISCONNECTED');
+        return;
+      }
+
       setConnectionStatus('CONNECTING');
 
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -165,7 +203,9 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         ws.onopen = () => {
           if (!active) return;
+          retryCount = 0; // Reset on successful connection
           setConnectionStatus('CONNECTED');
+          startHeartbeat(ws);
           addToast('🟢 Live Connected', 'Real-time WebSocket connected. All device actions synchronized.', 'SUCCESS');
         };
 
@@ -173,36 +213,75 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           if (!active) return;
           try {
             const message = JSON.parse(event.data);
+            // Ignore PONG responses
+            if (message.event === 'PONG') return;
             handleIncomingEvent(message);
           } catch (e) {
             console.error('Error handling WS event', e);
           }
         };
 
-        ws.onclose = () => {
+        ws.onclose = (e) => {
           if (!active) return;
+          stopHeartbeat();
           setConnectionStatus('DISCONNECTED');
-          // Reconnect with backoff
-          reconnectTimeoutRef.current = setTimeout(connect, 2500);
+          // Only reconnect if not a clean intentional close (code 1000)
+          if (e.code !== 1000) {
+            retryCount++;
+            const delay = getBackoffDelay();
+            console.log(`WebSocket closed (code ${e.code}). Reconnecting in ${Math.round(delay)}ms (attempt ${retryCount}/${MAX_RETRIES})...`);
+            reconnectTimeoutRef.current = setTimeout(connect, delay);
+          }
         };
 
         ws.onerror = () => {
           if (!active) return;
-          setConnectionStatus('DISCONNECTED');
-          ws.close();
+          // Don't set DISCONNECTED here — onclose will fire after onerror
+          // Just close the socket to trigger the onclose handler
+          try { ws.close(); } catch { /* already closing */ }
         };
       } catch (err) {
         console.error('WS connect error', err);
-        reconnectTimeoutRef.current = setTimeout(connect, 3000);
+        retryCount++;
+        const delay = getBackoffDelay();
+        reconnectTimeoutRef.current = setTimeout(connect, delay);
       }
     }
 
     connect();
 
+    // Also reconnect when the tab regains focus (handles laptop sleep/wake)
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && wsRef.current?.readyState !== WebSocket.OPEN) {
+        console.log('Tab visible again, reconnecting WebSocket...');
+        retryCount = 0;
+        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+        if (wsRef.current) try { wsRef.current.close(); } catch { /* ignore */ }
+        connect();
+      }
+    }
+
+    // Reconnect when browser comes back online
+    function handleOnline() {
+      if (wsRef.current?.readyState !== WebSocket.OPEN) {
+        console.log('Network back online, reconnecting WebSocket...');
+        retryCount = 0;
+        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+        if (wsRef.current) try { wsRef.current.close(); } catch { /* ignore */ }
+        connect();
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+
     return () => {
       active = false;
+      stopHeartbeat();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (wsRef.current) wsRef.current.close();
+      if (wsRef.current) wsRef.current.close(1000, 'Component unmounted');
     };
   }, [addToast]);
 
