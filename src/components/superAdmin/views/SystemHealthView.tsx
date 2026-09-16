@@ -14,6 +14,9 @@ import {
   WifiOff,
   Clock
 } from 'lucide-react';
+import { apiFetch } from '../../../utils/apiConfig';
+
+const fetch = apiFetch;
 
 export const SystemHealthView: React.FC<{ lang?: SupportedLanguage }> = ({ lang = 'en' }) => {
   const { connectionStatus } = useRealtime();

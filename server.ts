@@ -63,6 +63,17 @@ const PORT = Number(process.env.PORT) || 3001;
 const app = express();
 app.use(express.json());
 
+// Enable Cross-Origin Resource Sharing (CORS) for external frontends (e.g. Vercel)
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // In-Memory Database Store (Server Authoritative)
 let workers: WorkerProfile[] = JSON.parse(JSON.stringify(SEEDED_WORKERS));
 let customers: CustomerProfile[] = JSON.parse(JSON.stringify(SEEDED_CUSTOMERS));

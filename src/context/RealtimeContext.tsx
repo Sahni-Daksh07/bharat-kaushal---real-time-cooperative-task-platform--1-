@@ -27,6 +27,10 @@ import {
   calculateServiceBookingPricing,
   findAvailableTeamForService,
 } from '../utils/workerRequirementEngine';
+import { getWsUrl, apiFetch } from '../utils/apiConfig';
+
+// Route all API requests through apiConfig for cross-host deployment support
+const fetch = apiFetch;
 
 export interface ToastMessage {
   id: string;
@@ -194,8 +198,7 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       setConnectionStatus('CONNECTING');
 
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
+      const wsUrl = getWsUrl();
 
       try {
         const ws = new WebSocket(wsUrl);
@@ -850,7 +853,7 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       name,
       amount,
       status: 'PENDING' as const,
-      timestamp: new Date().toISOString(),
+      requestedAt: new Date().toISOString(),
     };
     setBookings((prev) =>
       prev.map((b) => {
@@ -1032,7 +1035,7 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           updatedBooking = {
             ...b,
             status: 'COMPLETED',
-            isPaid: true,
+            paymentStatus: 'PAID',
             paymentMethod: paymentData.method,
             invoiceNumber: b.invoiceNumber || invNum,
             dispatchLog: [
@@ -1070,8 +1073,14 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (b.id === bookingId) {
           updatedBooking = {
             ...b,
-            rating: stars,
-            feedback: feedback || '',
+            rating: {
+              stars,
+              quality: stars,
+              punctuality: stars,
+              behaviour: stars,
+              feedback: feedback || '',
+              createdAt: new Date().toISOString(),
+            },
             status: 'COMPLETED',
           };
           return updatedBooking;

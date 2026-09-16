@@ -34,6 +34,9 @@ import { EmailVerificationWidget } from '../common/EmailVerificationWidget';
 import { TradeSkillAssessmentModal } from '../worker/TradeSkillAssessmentModal';
 import { SupportedLanguage, getTranslation, SUPPORTED_LANGUAGES } from '../../utils/i18n';
 import { detectWorkerField, SUPPORTED_TRADES } from '../../utils/fieldDetector';
+import { apiFetch } from '../../utils/apiConfig';
+
+const fetch = apiFetch;
 
 interface WorkerAuthModalProps {
   isOpen: boolean;

@@ -19,6 +19,9 @@ import {
 import { AssessmentQuestion, AssessmentSubmissionResult, AssessmentCategory } from '../../types/assessment';
 import { SupportedLanguage, getTranslation, SUPPORTED_LANGUAGES } from '../../utils/i18n';
 import { generateTop15AssessmentQuestions } from '../../utils/assessmentGenerator';
+import { apiFetch } from '../../utils/apiConfig';
+
+const fetch = apiFetch;
 
 interface TradeSkillAssessmentModalProps {
   isOpen: boolean;

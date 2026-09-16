@@ -20,9 +20,12 @@ import {
   BadgeAlert,
   HelpCircle,
   Radio,
+  Navigation,
+  Compass,
 } from 'lucide-react';
 import { Booking, WorkerProfile } from '../../types';
 import { SupportedLanguage, getTranslation } from '../../utils/i18n';
+import { WorkerJobMap } from './WorkerJobMap';
 
 interface WorkerOrderCardViewProps {
   currentWorker: WorkerProfile;
@@ -45,6 +48,7 @@ interface WorkerOrderCardViewProps {
   onRequestMaterial?: () => void;
   onOpenAppeal?: () => void;
   onOpenMap?: () => void;
+  onSimulateStep?: (bookingId: string) => void;
 }
 
 export const WorkerOrderCardView: React.FC<WorkerOrderCardViewProps> = ({
@@ -66,6 +70,7 @@ export const WorkerOrderCardView: React.FC<WorkerOrderCardViewProps> = ({
   onRequestMaterial,
   onOpenAppeal,
   onOpenMap,
+  onSimulateStep,
 }) => {
   const t = (key: string, fallback: string) => getTranslation(language, key, fallback);
 
@@ -81,6 +86,7 @@ export const WorkerOrderCardView: React.FC<WorkerOrderCardViewProps> = ({
   const [otpError, setOtpError] = useState<string | null>(null);
   const [isVerifyingArrival, setIsVerifyingArrival] = useState(false);
   const [isVerifyingCompletion, setIsVerifyingCompletion] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   const displayBooking = activeBooking || selectedPastBooking || completedBookings[0];
 
@@ -282,13 +288,32 @@ export const WorkerOrderCardView: React.FC<WorkerOrderCardViewProps> = ({
                       </span>
                     )}
                   </div>
-                  {activeBooking && (
-                    <button
-                      onClick={onOpenMap}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800"
-                    >
-                      <span>View on GPS Map & Navigation →</span>
-                    </button>
+                  {displayBooking && (
+                    <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                      <button
+                        type="button"
+                        id="btn-view-customer-gps-map"
+                        onClick={() => {
+                          if (onOpenMap) onOpenMap();
+                          setIsMapModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                      >
+                        <Navigation size={13} />
+                        <span>View on GPS Map & Navigation →</span>
+                      </button>
+
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${displayBooking.customerAddress.lat ?? (displayBooking.customerAddress.address.toLowerCase().includes('navlakha') ? 22.7051 : 22.7533)},${displayBooking.customerAddress.lng ?? (displayBooking.customerAddress.address.toLowerCase().includes('navlakha') ? 75.8752 : 75.8937)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors border border-slate-300"
+                        title="Open Direct Turn-by-Turn GPS Navigation in Google Maps"
+                      >
+                        <span>Google Maps</span>
+                        <ExternalLink size={12} />
+                      </a>
+                    </div>
                   )}
                 </div>
               </div>
@@ -591,6 +616,107 @@ export const WorkerOrderCardView: React.FC<WorkerOrderCardViewProps> = ({
           >
             Return to Live Map & Radar
           </button>
+        </div>
+      )}
+
+      {/* GPS Map & Doorstep Navigation Modal */}
+      {isMapModalOpen && displayBooking && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[94vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-start justify-between gap-3">
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[11px] font-extrabold uppercase">
+                    <Navigation size={12} className="text-blue-600 animate-pulse" />
+                    GPS Map & Doorstep Navigation
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-500">
+                    Order #{displayBooking.id}
+                  </span>
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase ${
+                    displayBooking.status === 'CANCELLED'
+                      ? 'bg-rose-100 text-rose-800'
+                      : displayBooking.status === 'COMPLETED'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {displayBooking.status.replace(/_/g, ' ')}
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                  <span>{displayBooking.serviceName}</span>
+                  <span className="text-xs font-normal text-slate-500">• Citizen: {displayBooking.customerName}</span>
+                </h3>
+                <div className="text-xs text-slate-600 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="flex items-center gap-1">
+                    <MapPin size={12} className="text-rose-600 shrink-0" />
+                    <span>{displayBooking.customerAddress.address}, Indore</span>
+                  </span>
+                  {displayBooking.customerAddress.landmark && (
+                    <span className="text-blue-700 font-medium">
+                      Landmark: <strong>{displayBooking.customerAddress.landmark}</strong>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={`tel:${displayBooking.customerPhone}`}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
+                >
+                  <PhoneCall size={12} />
+                  <span>Call Citizen</span>
+                </a>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${displayBooking.customerAddress.lat ?? (displayBooking.customerAddress.address.toLowerCase().includes('navlakha') ? 22.7051 : 22.7533)},${displayBooking.customerAddress.lng ?? (displayBooking.customerAddress.address.toLowerCase().includes('navlakha') ? 75.8752 : 75.8937)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
+                >
+                  <ExternalLink size={12} />
+                  <span>Google Maps</span>
+                </a>
+                <button
+                  onClick={() => setIsMapModalOpen(false)}
+                  className="w-8 h-8 rounded-xl bg-white hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-600 transition-colors text-sm font-bold"
+                  title="Close Map"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Map Body */}
+            <div className="relative flex-1 min-h-[420px] sm:min-h-[500px] w-full">
+              <WorkerJobMap
+                worker={currentWorker}
+                booking={displayBooking}
+                allWorkers={[]}
+                onSimulateStep={onSimulateStep}
+                onWorkerArrived={onWorkerArrived}
+                onStartJourney={onStartJourney}
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-600">
+                <Compass size={14} className="text-blue-600" />
+                <span>Live GPS Radar connected to Indore Cooperative Grid</span>
+              </div>
+
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setIsMapModalOpen(false)}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold transition-colors"
+                >
+                  Back to Order Card
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

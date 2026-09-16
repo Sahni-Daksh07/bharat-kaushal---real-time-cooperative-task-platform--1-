@@ -30,6 +30,9 @@ import { TradeSkillAssessmentModal } from './TradeSkillAssessmentModal';
 import { SEEDED_SOCIETIES } from '../../data/seedData';
 import { WorkerProfile } from '../../types';
 import { EmailVerificationWidget } from '../common/EmailVerificationWidget';
+import { apiFetch } from '../../utils/apiConfig';
+
+const fetch = apiFetch;
 
 interface WorkerRegistrationModalProps {
   isOpen: boolean;

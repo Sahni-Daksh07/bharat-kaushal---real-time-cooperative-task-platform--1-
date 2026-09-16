@@ -97,11 +97,16 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
     worker.currentLocation?.lng ??
     75.8577;
 
-  // Customer coordinates fallback
-  const customerLat = booking?.customerAddress?.lat ?? 22.7533;
-  const customerLng = booking?.customerAddress?.lng ?? 75.8937;
+  // Customer coordinates fallback (auto-detect known Indore landmarks e.g. Navlakha Square)
+  const customerLat =
+    booking?.customerAddress?.lat ??
+    (booking?.customerAddress?.address?.toLowerCase().includes('navlakha') ? 22.7051 : 22.7533);
+  const customerLng =
+    booking?.customerAddress?.lng ??
+    (booking?.customerAddress?.address?.toLowerCase().includes('navlakha') ? 75.8752 : 75.8937);
 
-  const hasActiveJob =
+  const hasJob = Boolean(booking && (booking.customerAddress?.address || booking.customerAddress?.lat));
+  const isNavigableJob =
     booking &&
     ['CONFIRMED', 'TRAVELLING', 'ARRIVED', 'IN_PROGRESS', 'COMPLETION_PENDING'].includes(
       booking.status
@@ -135,20 +140,20 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
 
   // Initialize Leaflet Map
   useEffect(() => {
-    if (!activeKey || !mapContainerRef.current) return;
+    if (!mapContainerRef.current) return;
 
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
       mapInstanceRef.current = null;
     }
 
-    const initialCenter: [number, number] = hasActiveJob
+    const initialCenter: [number, number] = hasJob
       ? [(workerLat + customerLat) / 2, (workerLng + customerLng) / 2]
       : [workerLat, workerLng];
 
     const map = L.map(mapContainerRef.current, {
       center: initialCenter,
-      zoom: hasActiveJob ? 13 : 13,
+      zoom: hasJob ? 13 : 13,
       zoomControl: false,
     });
 
@@ -157,34 +162,62 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
     const elementsLayer = L.layerGroup().addTo(map);
     elementsLayerRef.current = elementsLayer;
 
-    const tileUrl = `https://maps.geoapify.com/v1/tile/${currentStyle}/{z}/{x}/{y}.png?apiKey=${activeKey}`;
+    const tileUrl = activeKey
+      ? `https://maps.geoapify.com/v1/tile/${currentStyle}/{z}/{x}/{y}.png?apiKey=${activeKey}`
+      : `https://tile.openstreetmap.org/{z}/{x}/{y}.png`;
+
     const tileLayer = L.tileLayer(tileUrl, {
-      attribution:
-        'Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> | &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>',
+      attribution: activeKey
+        ? 'Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> | &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>'
+        : '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
       maxZoom: 20,
     }).addTo(map);
+
+    tileLayer.on('tileerror', () => {
+      if (activeKey) {
+        tileLayer.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+      }
+    });
+
     tileLayerRef.current = tileLayer;
 
+    // Invalidate map size after short delay to handle modal rendering
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+
     return () => {
+      clearTimeout(timer);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
     };
-  }, [activeKey]);
+  }, [activeKey, hasJob]);
 
   // Update map style when changed
   useEffect(() => {
-    if (!mapInstanceRef.current || !activeKey) return;
+    if (!mapInstanceRef.current) return;
     if (tileLayerRef.current) {
       mapInstanceRef.current.removeLayer(tileLayerRef.current);
     }
-    const tileUrl = `https://maps.geoapify.com/v1/tile/${currentStyle}/{z}/{x}/{y}.png?apiKey=${activeKey}`;
+    const tileUrl = activeKey
+      ? `https://maps.geoapify.com/v1/tile/${currentStyle}/{z}/{x}/{y}.png?apiKey=${activeKey}`
+      : `https://tile.openstreetmap.org/{z}/{x}/{y}.png`;
+
     const newLayer = L.tileLayer(tileUrl, {
-      attribution:
-        'Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> | &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>',
+      attribution: activeKey
+        ? 'Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> | &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>'
+        : '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
       maxZoom: 20,
     }).addTo(mapInstanceRef.current);
+
+    newLayer.on('tileerror', () => {
+      if (activeKey) {
+        newLayer.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+      }
+    });
+
     tileLayerRef.current = newLayer;
   }, [currentStyle, activeKey]);
 
@@ -238,18 +271,24 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
     elementsLayer.addLayer(workerMarker);
 
     // 2. Active Job Route & Customer Marker
-    if (hasActiveJob && booking) {
+    if (hasJob && booking) {
+      const isCancelled = booking.status === 'CANCELLED';
+      const isCompleted = ['COMPLETED', 'PAID', 'SETTLED'].includes(booking.status);
+      const markerColor = isCancelled ? '#e11d48' : isCompleted ? '#059669' : '#dc2626';
+      const badgeBg = isCancelled ? '#9f1239' : isCompleted ? '#065f46' : '#991b1b';
+      const badgeText = isCancelled ? 'Cancelled Job' : isCompleted ? 'Completed Job' : 'Target Doorstep';
+
       // Customer Doorstep Marker
       const customerMarkerHtml = `
-        <div style="position: relative; display: flex; flex-direction: column; align-items: center; width: 150px; margin-left: -75px; margin-top: -20px; pointer-events: auto;">
-          <div style="width: 36px; height: 36px; border-radius: 9999px; background-color: #dc2626; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(220,38,38,0.4); border: 2.5px solid #ffffff;">
+        <div style="position: relative; display: flex; flex-direction: column; align-items: center; width: 160px; margin-left: -80px; margin-top: -20px; pointer-events: auto;">
+          <div style="width: 38px; height: 38px; border-radius: 9999px; background-color: ${markerColor}; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2.5px solid #ffffff;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
           </div>
-          <div style="margin-top: 3px; background-color: #991b1b; color: #ffffff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 9999px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-            Target: ${booking.customerName}
+          <div style="margin-top: 3px; background-color: ${badgeBg}; color: #ffffff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 9999px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            ${badgeText}: ${booking.customerName}
           </div>
         </div>
       `;
@@ -267,18 +306,23 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
       });
 
       customerMarker.bindPopup(`
-        <div style="font-family: inherit; font-size: 12px; color: #0f172a; min-width: 190px;">
-          <div style="font-weight: 800; color: #dc2626;">🎯 Customer Doorstep</div>
-          <div style="margin-top: 2px; font-weight: 700;">${booking.customerName}</div>
-          <div style="font-size: 10px; color: #475569; margin-top: 2px;">${booking.customerAddress.address}, Indore</div>
+        <div style="font-family: inherit; font-size: 12px; color: #0f172a; min-width: 200px;">
+          <div style="font-weight: 800; color: ${markerColor};">🎯 Customer Doorstep</div>
+          <div style="margin-top: 2px; font-weight: 700; font-size: 13px;">${booking.customerName}</div>
+          <div style="font-size: 11px; color: #334155; margin-top: 2px; font-weight: 500;">${booking.customerAddress.address}, Indore</div>
           ${
             booking.customerAddress.landmark
-              ? `<div style="font-size: 10px; color: #0284c7;">Landmark: ${booking.customerAddress.landmark}</div>`
+              ? `<div style="font-size: 10px; color: #0284c7; font-weight: 600; margin-top: 1px;">Landmark: ${booking.customerAddress.landmark}</div>`
               : ''
           }
           <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; color: #059669;">₹${booking.pricing.workerShare} Earn</span>
+            <span style="font-weight: 800; color: #059669;">₹${booking.pricing.workerShare} Share</span>
             <span style="font-size: 10px; color: #64748b;">${booking.serviceName}</span>
+          </div>
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${customerLat},${customerLng}" target="_blank" rel="noopener noreferrer" style="display: block; text-align: center; background: #2563eb; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-decoration: none;">
+              Open in Native GPS Navigation →
+            </a>
           </div>
         </div>
       `);
@@ -292,10 +336,10 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
       ];
 
       const polyline = L.polyline(routePoints, {
-        color: '#2563eb',
+        color: isCancelled ? '#94a3b8' : isCompleted ? '#059669' : '#2563eb',
         weight: 4,
         opacity: 0.85,
-        dashArray: booking.status === 'TRAVELLING' ? '8, 8' : undefined,
+        dashArray: isCancelled ? '4, 8' : booking.status === 'TRAVELLING' ? '8, 8' : undefined,
       }).addTo(map);
       routeLineRef.current = polyline;
 
@@ -303,7 +347,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
       map.fitBounds([
         [workerLat, workerLng],
         [customerLat, customerLng],
-      ], { padding: [50, 50] });
+      ], { padding: [50, 50], maxZoom: 16 });
     } else {
       // 3. Standby Mode: Service Coverage Circle
       const circle = L.circle([workerLat, workerLng], {
@@ -384,7 +428,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
     workerLng,
     customerLat,
     customerLng,
-    hasActiveJob,
+    hasJob,
     booking?.status,
     coverageRadiusKm,
     showDemandHubs,
@@ -402,7 +446,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
 
   // Center on whole route
   const handleFitRoute = () => {
-    if (mapInstanceRef.current && hasActiveJob) {
+    if (mapInstanceRef.current && hasJob) {
       mapInstanceRef.current.fitBounds([
         [workerLat, workerLng],
         [customerLat, customerLng],
@@ -443,7 +487,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
             <span className="hidden sm:inline">{t('My_GPS_0n6xu', `My GPS`)}</span>
           </button>
 
-          {hasActiveJob && (
+          {hasJob && (
             <button
               onClick={handleFitRoute}
               className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-xl shadow-md text-xs font-bold w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 transition-all active:scale-95"
@@ -455,7 +499,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
           )}
 
           {/* Toggle Overlays when idle */}
-          {!hasActiveJob && (
+          {!hasJob && (
             <div className="hidden sm:flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md px-2.5 py-1 rounded-xl text-white text-[11px] border border-slate-700/80 shadow-md">
               <button
                 onClick={() => setShowDemandHubs(!showDemandHubs)}
@@ -522,17 +566,21 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
       </div>
 
       {/* Active Navigation Floating Card (Bottom Left) */}
-      {hasActiveJob && booking && (
+      {hasJob && booking && (
         <div className="absolute bottom-3 left-3 right-14 sm:right-auto sm:max-w-md z-20 bg-slate-900/95 backdrop-blur-md text-white rounded-2xl p-3 sm:p-4 border border-slate-700 shadow-xl pointer-events-auto space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping" />
+              <span className={`w-2 h-2 rounded-full ${isNavigableJob ? 'bg-blue-400 animate-ping' : booking.status === 'CANCELLED' ? 'bg-rose-500' : 'bg-emerald-400'}`} />
               <span className="font-extrabold text-xs text-blue-300 uppercase tracking-wide">
-                {t('Active_Job_Route__ido25', `Active Job Route:`)}{booking.serviceName}
+                {isNavigableJob ? t('Active_Job_Route__ido25', `Active Job Route:`) : t('Job_Destination__ido25', `Job Destination:`)} {booking.serviceName}
               </span>
             </div>
-            <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
-              ₹{booking.pricing.workerShare}
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
+              booking.status === 'CANCELLED'
+                ? 'text-rose-400 bg-rose-950/60 border-rose-500/30'
+                : 'text-emerald-400 bg-emerald-950/60 border-emerald-500/30'
+            }`}>
+              {booking.status === 'CANCELLED' ? 'ORDER CANCELLED' : `₹${booking.pricing?.workerShare ?? 0}`}
             </span>
           </div>
 
@@ -584,14 +632,21 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
               </button>
             )}
 
+            {booking.status === 'CANCELLED' && (
+              <span className="text-[11px] text-rose-300 font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                Service call was cancelled
+              </span>
+            )}
+
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${customerLat},${customerLng}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium flex items-center gap-1 ml-auto"
+              className="py-1.5 px-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 ml-auto shadow-xs"
               title={t('Open_in_Native_GPS_b4osj', `Open in Native GPS`)}
             >
-              <span>{t('External_GPS_bsm2r', `External GPS`)}</span>
+              <span>{t('External_GPS_bsm2r', `Google Maps Navigation`)}</span>
               <ExternalLink size={11} />
             </a>
           </div>
@@ -599,7 +654,7 @@ export const WorkerJobMap: React.FC<WorkerJobMapProps> = ({
       )}
 
       {/* Standby Radius Control (Bottom Left when Idle) */}
-      {!hasActiveJob && (
+      {!hasJob && (
         <div className="absolute bottom-3 left-3 z-20 bg-slate-900/90 backdrop-blur-xs text-white rounded-2xl p-2.5 sm:p-3 border border-slate-700 shadow-lg pointer-events-auto flex items-center gap-3 text-xs max-w-[calc(100%-4.5rem)] sm:max-w-none">
           <div className="flex items-center gap-1.5 font-bold text-slate-300">
             <Radio size={14} className="text-blue-400" />

@@ -835,7 +835,11 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
                 <div className="h-[340px] w-full rounded-xl overflow-hidden border border-slate-200">
                   <WorkerJobMap
                     worker={currentWorker}
+                    booking={myBooking}
                     allWorkers={workers}
+                    onSimulateStep={(bookingId) => simulateWorkerStep(bookingId)}
+                    onWorkerArrived={(bookingId) => workerArrived(bookingId)}
+                    onStartJourney={(bookingId) => startJourney(bookingId)}
                   />
                 </div>
 
@@ -1398,6 +1402,7 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
           policy={policy}
           onStartJourney={startJourney}
           onWorkerArrived={workerArrived}
+          onSimulateStep={(bookingId) => simulateWorkerStep(bookingId)}
           onVerifyArrivalOtp={async (bookingId, otp) => {
             const b = await verifyArrivalOtp(bookingId, otp);
             return !!b;

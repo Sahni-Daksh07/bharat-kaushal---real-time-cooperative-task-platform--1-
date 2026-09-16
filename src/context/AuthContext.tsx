@@ -15,6 +15,9 @@ import {
   SEEDED_FEDERATION_ADMINS,
   SEEDED_SUPER_ADMINS,
 } from '../data/seedData';
+import { apiFetch } from '../utils/apiConfig';
+
+const fetch = apiFetch;
 
 interface AuthContextType {
   // Customer Auth

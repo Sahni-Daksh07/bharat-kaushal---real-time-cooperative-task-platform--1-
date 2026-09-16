@@ -341,6 +341,7 @@ export type BookingStatus =
   | 'REQUESTED'
   | 'MATCHING'
   | 'WORKER_OFFERED'
+  | 'WORKER_DISPATCHED'
   | 'ACCEPTED'
   | 'CONFIRMED'
   | 'TRAVELLING'

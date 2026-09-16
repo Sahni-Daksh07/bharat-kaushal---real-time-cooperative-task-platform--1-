@@ -12,6 +12,9 @@ import {
   Bot,
   User,
 } from 'lucide-react';
+import { apiFetch } from '../../utils/apiConfig';
+
+const fetch = apiFetch;
 
 interface BharatKaushalCareProps {
   lang?: SupportedLanguage;
