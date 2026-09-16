@@ -13,6 +13,7 @@ import { AuthModalsContainer } from './components/auth/AuthModalsContainer';
 import { LandingPage } from './components/landing/LandingPage';
 import { UnifiedAuthExperience } from './components/auth/UnifiedAuthExperience';
 import { MobileNavigation } from './components/common/MobileNavigation';
+import { PlatformLoadingScreen } from './components/common/PlatformLoadingScreen';
 import { SupportedLanguage } from './utils/i18n';
 import {
   ShieldCheck,
@@ -385,6 +386,7 @@ function MainAppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
+      <PlatformLoadingScreen />
       <RealtimeProvider>
         <AuthProvider>
           <MainAppContent />
