@@ -159,7 +159,7 @@ function MainAppContent() {
 
 
   return (
-    <div className="min-h-screen bg-slate-100/60 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 pb-16 sm:pb-0">
+    <div className="min-h-screen bg-slate-100/60 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 pb-24 sm:pb-0">
       {/* Toast Notification Container */}
       <div className="fixed top-14 right-4 z-[80] flex flex-col gap-2 max-w-sm pointer-events-none">
         {toasts.map((t) => (

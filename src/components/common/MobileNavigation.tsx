@@ -67,8 +67,19 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   const { bookings } = useRealtime();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeMobileTab, setActiveMobileTab] = useState<string>(
+    activeTab || (currentRole === 'WORKER' ? 'DASHBOARD' : 'SERVICES')
+  );
 
   const t = (key: string, fallback?: string) => getTranslation(lang, key, fallback);
+
+  const handleTabClick = (tabKey: string, customEventName?: string) => {
+    setActiveMobileTab(tabKey);
+    onSelectTab?.(tabKey);
+    if (customEventName) {
+      document.dispatchEvent(new CustomEvent(customEventName));
+    }
+  };
 
   const getUserDetails = () => {
     switch (currentRole) {
@@ -127,110 +138,159 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     onNavigateHome?.();
   };
 
+  const hasPendingOrders = bookings.some(
+    (b) => b.status === 'ACCEPTED' || b.status === 'TRAVELLING' || b.status === 'IN_PROGRESS' || b.status === 'WORKER_DISPATCHED'
+  );
+
   return (
     <>
-      {/* Persistent Bottom Bar (< 640px) */}
+      {/* Persistent Native Mobile App Bottom Navigation Bar (< 640px) */}
       <nav
-        aria-label="Mobile Navigation"
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg"
+        aria-label="Mobile Navigation Dock"
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-2xl border-t border-slate-200/90 px-3 py-1.5 flex items-center justify-around shadow-[0_-6px_25px_rgba(15,23,42,0.08)] select-none"
       >
         {currentRole === 'WORKER' ? (
           <>
             <button
-              onClick={() => onSelectTab?.('DASHBOARD')}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-                activeTab === 'DASHBOARD' ? 'text-blue-600' : 'text-slate-500'
+              onClick={() => handleTabClick('DASHBOARD', 'OPEN_WORKER_DASHBOARD')}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
+                activeMobileTab === 'DASHBOARD'
+                  ? 'text-blue-600'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Home size={18} />
+              <Home size={19} strokeWidth={activeMobileTab === 'DASHBOARD' ? 2.5 : 2} />
               <span>Home</span>
+              {activeMobileTab === 'DASHBOARD' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+              )}
             </button>
 
             <button
-              onClick={() => onSelectTab?.('FIND_WORK')}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-                activeTab === 'FIND_WORK' ? 'text-blue-600' : 'text-slate-500'
+              onClick={() => handleTabClick('FIND_WORK', 'OPEN_FIND_WORK')}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
+                activeMobileTab === 'FIND_WORK'
+                  ? 'text-blue-600'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Search size={18} />
+              <Search size={19} strokeWidth={activeMobileTab === 'FIND_WORK' ? 2.5 : 2} />
               <span>Find Work</span>
+              {activeMobileTab === 'FIND_WORK' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+              )}
             </button>
 
             <button
-              onClick={() => onSelectTab?.('ORDER_CARD')}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-                activeTab === 'ORDER_CARD' ? 'text-blue-600' : 'text-slate-500'
+              onClick={() => handleTabClick('ORDER_CARD', 'OPEN_ORDER_CARD')}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all relative ${
+                activeMobileTab === 'ORDER_CARD'
+                  ? 'text-blue-600'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Briefcase size={18} />
+              <div className="relative">
+                <Briefcase size={19} strokeWidth={activeMobileTab === 'ORDER_CARD' ? 2.5 : 2} />
+                {hasPendingOrders && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white animate-pulse" />
+                )}
+              </div>
               <span>Jobs</span>
+              {activeMobileTab === 'ORDER_CARD' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+              )}
             </button>
 
             <button
-              onClick={() => onSelectTab?.('INCOME_HISTORY')}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-                activeTab === 'INCOME_HISTORY' ? 'text-blue-600' : 'text-slate-500'
+              onClick={() => handleTabClick('INCOME_HISTORY', 'OPEN_INCOME_HISTORY')}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
+                activeMobileTab === 'INCOME_HISTORY'
+                  ? 'text-blue-600'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Wallet size={18} />
+              <Wallet size={19} strokeWidth={activeMobileTab === 'INCOME_HISTORY' ? 2.5 : 2} />
               <span>Earnings</span>
+              {activeMobileTab === 'INCOME_HISTORY' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+              )}
             </button>
 
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500 hover:text-slate-800"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 active:scale-95 transition-all"
             >
-              <User size={18} />
+              <User size={19} />
               <span>Profile</span>
             </button>
           </>
         ) : currentRole === 'CUSTOMER' ? (
           <>
             <button
-              onClick={() => onSelectTab?.('SERVICES')}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-                activeTab === 'SERVICES' ? 'text-blue-600' : 'text-slate-500'
+              onClick={() => handleTabClick('SERVICES', 'OPEN_CUSTOMER_SERVICES')}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
+                activeMobileTab === 'SERVICES'
+                  ? 'text-blue-600'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Home size={18} />
-              <span>Home</span>
+              <Home size={19} strokeWidth={activeMobileTab === 'SERVICES' ? 2.5 : 2} />
+              <span>Services</span>
+              {activeMobileTab === 'SERVICES' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+              )}
             </button>
 
             <button
-              onClick={() => onSelectTab?.('HISTORY')}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-                activeTab === 'HISTORY' ? 'text-blue-600' : 'text-slate-500'
+              onClick={() => handleTabClick('HISTORY', 'OPEN_CUSTOMER_HISTORY')}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all relative ${
+                activeMobileTab === 'HISTORY'
+                  ? 'text-blue-600'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Calendar size={18} />
+              <div className="relative">
+                <Calendar size={19} strokeWidth={activeMobileTab === 'HISTORY' ? 2.5 : 2} />
+                {hasPendingOrders && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
+                )}
+              </div>
               <span>Bookings</span>
+              {activeMobileTab === 'HISTORY' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+              )}
             </button>
 
             <button
-              onClick={() => onSelectTab?.('MAP')}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-                activeTab === 'MAP' ? 'text-blue-600' : 'text-slate-500'
+              onClick={() => handleTabClick('MAP', 'OPEN_CUSTOMER_MAP')}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
+                activeMobileTab === 'MAP'
+                  ? 'text-blue-600'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <MapPin size={18} />
+              <MapPin size={19} strokeWidth={activeMobileTab === 'MAP' ? 2.5 : 2} />
               <span>Live Map</span>
+              {activeMobileTab === 'MAP' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+              )}
             </button>
 
             <button
               onClick={() => {
                 document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
               }}
-              className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 active:scale-95 transition-all"
             >
-              <LifeBuoy size={18} />
-              <span>Support</span>
+              <LifeBuoy size={19} />
+              <span>Help</span>
             </button>
 
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500 hover:text-slate-800"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 active:scale-95 transition-all"
             >
-              <User size={18} />
+              <User size={19} />
               <span>Profile</span>
             </button>
           </>
@@ -238,26 +298,26 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
           /* Admins Bottom Navigation */
           <>
             <button
-              onClick={() => onSelectTab?.('OVERVIEW')}
-              className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold text-blue-600"
+              onClick={() => handleTabClick('OVERVIEW')}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-blue-600 active:scale-95 transition-all"
             >
-              <Home size={18} />
+              <Home size={19} strokeWidth={2.5} />
               <span>Command</span>
             </button>
 
             <button
               onClick={() => openAuthModal(currentRole)}
-              className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 active:scale-95 transition-all"
             >
-              <Shield size={18} />
+              <Shield size={19} />
               <span>Clearance</span>
             </button>
 
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 active:scale-95 transition-all"
             >
-              <Menu size={18} />
+              <Menu size={19} />
               <span>Menu</span>
             </button>
           </>

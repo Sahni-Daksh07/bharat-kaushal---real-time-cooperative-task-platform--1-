@@ -134,15 +134,24 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({ lang }) => {
       }
     };
     
+    const handleServices = () => setPortalTab('SERVICES');
+    const handleMap = () => setPortalTab('MAP');
+    
     document.addEventListener('OPEN_PROFILE', handleProfile);
     document.addEventListener('OPEN_HISTORY', handleHistory);
     document.addEventListener('OPEN_INVOICES', handleInvoices);
     document.addEventListener('OPEN_RECONCILIATION', handleReconciliation);
+    document.addEventListener('OPEN_CUSTOMER_SERVICES', handleServices);
+    document.addEventListener('OPEN_CUSTOMER_MAP', handleMap);
+    document.addEventListener('OPEN_CUSTOMER_HISTORY', handleHistory);
     return () => {
       document.removeEventListener('OPEN_PROFILE', handleProfile);
       document.removeEventListener('OPEN_HISTORY', handleHistory);
       document.removeEventListener('OPEN_INVOICES', handleInvoices);
       document.removeEventListener('OPEN_RECONCILIATION', handleReconciliation);
+      document.removeEventListener('OPEN_CUSTOMER_SERVICES', handleServices);
+      document.removeEventListener('OPEN_CUSTOMER_MAP', handleMap);
+      document.removeEventListener('OPEN_CUSTOMER_HISTORY', handleHistory);
     };
   }, [bookings, effectiveCustomer]);
 

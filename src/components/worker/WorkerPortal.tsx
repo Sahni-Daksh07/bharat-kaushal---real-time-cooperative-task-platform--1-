@@ -98,16 +98,19 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({ lang }) => {
   // Custom Event Listeners from Header Menu
   React.useEffect(() => {
     const handleProfile = () => setIsProfileModalOpen(true);
+    const handleDashboard = () => setPortalTab('DASHBOARD');
     const handleFindWork = () => setPortalTab('FIND_WORK');
     const handleOrderCard = () => setPortalTab('ORDER_CARD');
     const handleIncome = () => setPortalTab('INCOME_HISTORY');
     
     document.addEventListener('OPEN_PROFILE', handleProfile);
+    document.addEventListener('OPEN_WORKER_DASHBOARD', handleDashboard);
     document.addEventListener('OPEN_FIND_WORK', handleFindWork);
     document.addEventListener('OPEN_ORDER_CARD', handleOrderCard);
     document.addEventListener('OPEN_INCOME_HISTORY', handleIncome);
     return () => {
       document.removeEventListener('OPEN_PROFILE', handleProfile);
+      document.removeEventListener('OPEN_WORKER_DASHBOARD', handleDashboard);
       document.removeEventListener('OPEN_FIND_WORK', handleFindWork);
       document.removeEventListener('OPEN_ORDER_CARD', handleOrderCard);
       document.removeEventListener('OPEN_INCOME_HISTORY', handleIncome);

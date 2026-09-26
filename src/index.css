@@ -87,17 +87,121 @@ body {
 }
 
 /* Modern Card Styling */
+/* Modern Glassmorphic Card Styling */
 .bk-card {
-  background: #ffffff;
-  border: 1px solid var(--bk-card-border);
-  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 1.25rem;
   box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .bk-card:hover {
-  border-color: rgba(203, 213, 225, 0.95);
-  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(148, 163, 184, 0.6);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.09), 0 6px 12px -3px rgba(15, 23, 42, 0.04);
+  transform: translateY(-3px);
+}
+
+/* Glass Sheen Sweep Reflection */
+.glass-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-sheen::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  transition: all 0.75s ease;
+  pointer-events: none;
+}
+
+.glass-sheen:hover::after {
+  left: 150%;
+}
+
+/* Glassmorphism & Ambient Glow Utilities */
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05);
+}
+
+.glass-panel-dark {
+  background: rgba(6, 11, 24, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.glass-pill {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glow-blue {
+  box-shadow: 0 0 45px -10px rgba(37, 99, 235, 0.35);
+}
+
+.glow-saffron {
+  box-shadow: 0 0 45px -10px rgba(245, 158, 11, 0.35);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 45px -10px rgba(16, 185, 129, 0.35);
+}
+
+/* Infinite Marquee Ticker */
+@keyframes bkTicker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: bkTicker 32s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Smooth Horizontal Snap Carousel */
+.horizontal-scroll-snap {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.75rem;
+}
+
+.horizontal-scroll-snap > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
 }
 
 /* Interactive Badge & Button Effects */
@@ -122,7 +226,8 @@ body {
 /* Mobile Safe Bottom Padding for Persistent Bottom Nav */
 @media (max-width: 639px) {
   body {
-    padding-bottom: 4.5rem;
+    padding-bottom: 5.5rem;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
