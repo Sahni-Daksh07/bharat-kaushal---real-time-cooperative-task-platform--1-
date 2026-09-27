@@ -1,6 +1,7 @@
-import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useState, useEffect, useRef, Component, ErrorInfo, ReactNode } from 'react';
 import { RealtimeProvider, useRealtime } from './context/RealtimeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Header, UserRole } from './components/common/Header';
 import { CustomerPortal } from './components/customer/CustomerPortal';
 import { WorkerPortal } from './components/worker/WorkerPortal';
@@ -86,6 +87,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
 function MainAppContent() {
   const { isAccountLoggedIn } = useAuth();
+  const { isStarryNight } = useTheme();
   const [currentView, setCurrentView] = useState<'LANDING' | 'PORTAL'>('LANDING');
   const [currentRole, setCurrentRole] = useState<UserRole>('CUSTOMER');
   const [lang, setLang] = useState<SupportedLanguage>('en');
@@ -130,13 +132,34 @@ function MainAppContent() {
     }
   };
 
+  const isInitialLangMount = useRef(true);
+
   useEffect(() => {
     (window as any).__currentLang = lang;
     
+    // Strictly prevent Google Translate from running automatically on initial page load
+    if (isInitialLangMount.current) {
+      isInitialLangMount.current = false;
+      try {
+        if (!sessionStorage.getItem('bk_user_selected_lang')) {
+          document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname + ";";
+        }
+      } catch (e) {}
+      return;
+    }
+
+    try {
+      sessionStorage.setItem('bk_user_selected_lang', lang);
+      if (lang === 'en') {
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname + ";";
+      }
+    } catch (e) {}
+
     const triggerTranslation = () => {
       const gTranslateObj = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
       if (gTranslateObj) {
-        // Find if language is in the dropdown
         let found = false;
         for (let i = 0; i < gTranslateObj.options.length; i++) {
           if (gTranslateObj.options[i].value === lang) {
@@ -152,36 +175,38 @@ function MainAppContent() {
       }
     };
     
-    // Slight delay to ensure script loaded if changed immediately
-    setTimeout(triggerTranslation, 500);
-    setTimeout(triggerTranslation, 2000); // fallback
+    setTimeout(triggerTranslation, 300);
   }, [lang]);
 
 
   return (
-    <div className="min-h-screen bg-slate-100/60 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 pb-24 sm:pb-0">
-      {/* Toast Notification Container */}
+    <div className={`min-h-screen flex flex-col font-sans pb-24 sm:pb-0 transition-colors duration-300 ${
+      isStarryNight
+        ? 'theme-starry-night text-slate-100 selection:bg-blue-600/30 selection:text-blue-200'
+        : 'theme-daylight bg-[#f5f4f0] text-slate-900 selection:bg-amber-100 selection:text-amber-900'
+    }`}>
+      {/* Toast Notification Container — Starry Night Glass */}
       <div className="fixed top-14 right-4 z-[80] flex flex-col gap-2 max-w-sm pointer-events-none">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto p-3 rounded-xl shadow-lg border text-xs flex items-start justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200 ${
+            className={`pointer-events-auto p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border text-xs flex items-start justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200 ${
               t.type === 'SUCCESS'
-                ? 'bg-emerald-50 text-emerald-950 border-emerald-300'
+                ? 'bg-[#020817]/90 text-emerald-300 border-emerald-500/40 shadow-emerald-950/50'
                 : t.type === 'ALERT'
-                ? 'bg-rose-50 text-rose-950 border-rose-300'
+                ? 'bg-[#020817]/90 text-rose-300 border-rose-500/40 shadow-rose-950/50'
                 : t.type === 'WARNING'
-                ? 'bg-amber-50 text-amber-950 border-amber-300'
-                : 'bg-white text-slate-900 border-slate-200'
+                ? 'bg-[#020817]/90 text-amber-300 border-amber-500/40 shadow-amber-950/50'
+                : 'bg-[#0a1021]/90 text-slate-100 border-white/15 shadow-black/60'
             }`}
           >
             <div>
               <div className="font-bold flex items-center gap-1.5">{t.title}</div>
-              <div className="mt-0.5 opacity-90">{t.body}</div>
+              <div className="mt-0.5 opacity-90 text-[11px] text-slate-300">{t.body}</div>
             </div>
             <button
               onClick={() => dismissToast(t.id)}
-              className="text-slate-400 hover:text-slate-700 p-0.5"
+              className="text-slate-400 hover:text-slate-100 p-0.5 cursor-pointer transition-colors"
             >
               <X size={13} />
             </button>
@@ -386,12 +411,14 @@ function MainAppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <PlatformLoadingScreen />
-      <RealtimeProvider>
-        <AuthProvider>
-          <MainAppContent />
-        </AuthProvider>
-      </RealtimeProvider>
+      <ThemeProvider>
+        <PlatformLoadingScreen />
+        <RealtimeProvider>
+          <AuthProvider>
+            <MainAppContent />
+          </AuthProvider>
+        </RealtimeProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

@@ -50,11 +50,11 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
     }
   }, [initialTab, isOpen]);
 
-  // Form states
-  const [phone, setPhone] = useState(customerUser?.phone || '9826012345');
+  // Form states - strictly empty initial values without hardcoded prefill
+  const [phone, setPhone] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpValue, setOtpValue] = useState('');
-  const [generatedOtp, setGeneratedOtp] = useState('4829');
+  const [generatedOtp, setGeneratedOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 

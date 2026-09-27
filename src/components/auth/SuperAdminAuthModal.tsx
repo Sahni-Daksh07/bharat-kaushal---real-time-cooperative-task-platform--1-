@@ -50,10 +50,10 @@ export const SuperAdminAuthModal: React.FC<SuperAdminAuthModalProps> = ({
     }
   }, [initialTab, isOpen]);
 
-  // Login Form
-  const [officialId, setOfficialId] = useState(superAdminUser?.id || 'GOV-MOL-JS-001');
-  const [passcode, setPasscode] = useState('BHARAT-APEX-2026');
-  const [totpCode, setTotpCode] = useState('892104');
+  // Login Form (strictly empty initial values without hardcoded prefill)
+  const [officialId, setOfficialId] = useState('');
+  const [passcode, setPasscode] = useState('');
+  const [totpCode, setTotpCode] = useState('');
   const [clearanceLevel, setClearanceLevel] = useState<'APEX_LEVEL_5_NATIONAL' | 'LEVEL_4_MINISTERIAL' | 'LEVEL_3_REGULATORY'>('APEX_LEVEL_5_NATIONAL');
 
   // Registration Form

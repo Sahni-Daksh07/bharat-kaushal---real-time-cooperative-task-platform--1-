@@ -146,17 +146,18 @@ export const BharatKaushalCare: React.FC<BharatKaushalCareProps> = ({
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50">
-      {/* Trigger Button */}
+    <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40">
+      {/* Trigger Button - Compact, accessible and unobtrusive */}
       {!isOpen && (
         <button
           id="btn-open-chatbot"
           onClick={() => setIsOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-full shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:px-3.5 sm:py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 border border-blue-500/30 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           title={t('Bharat_Kaushal_Support_Assista_jtgim', `Bharat Kaushal Support Assistant`)}
+          aria-label="Open Support & Help Assistant"
         >
-          <MessageSquare size={22} />
-          <span className="text-xs font-bold pr-1 hidden sm:inline">{t('Help___Care_gdfv3', `Help & Care`)}</span>
+          <MessageSquare size={18} />
+          <span className="text-xs font-semibold hidden sm:inline">{t('Help___Care_gdfv3', `Support & Help`)}</span>
         </button>
       )}
 

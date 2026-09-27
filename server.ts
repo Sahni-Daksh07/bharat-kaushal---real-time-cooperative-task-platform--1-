@@ -46,6 +46,10 @@ import {
   findAvailableTeamForService,
 } from './src/utils/workerRequirementEngine';
 import { GoogleGenAI } from '@google/genai';
+import { db } from './src/db';
+
+// Initialize and connect persistent database engine
+db.connect().catch((err) => console.error('[DB] Auto-connect initialization warning:', err));
 
 let geminiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
@@ -253,6 +257,14 @@ app.get('/api/health', (_req, res) => {
     workersCount: workers.length,
     bookingsCount: bookings.length,
     time: new Date().toISOString(),
+  });
+});
+
+app.get('/api/db/stats', (_req, res) => {
+  res.json({
+    success: true,
+    connected: db.isDbConnected(),
+    stats: db.getStatsSummary(),
   });
 });
 

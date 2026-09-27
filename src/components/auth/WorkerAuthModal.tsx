@@ -72,9 +72,9 @@ export const WorkerAuthModal: React.FC<WorkerAuthModalProps> = ({
     }
   }, [initialTab, isOpen]);
 
-  // Form states - Login
-  const [workerIdOrPhone, setWorkerIdOrPhone] = useState(workerUser?.id || 'BH-KAUSHAL-WKR-000124');
-  const [tradePin, setTradePin] = useState('1234');
+  // Form states - Login (strictly empty initial values without hardcoded prefill)
+  const [workerIdOrPhone, setWorkerIdOrPhone] = useState('');
+  const [tradePin, setTradePin] = useState('');
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 

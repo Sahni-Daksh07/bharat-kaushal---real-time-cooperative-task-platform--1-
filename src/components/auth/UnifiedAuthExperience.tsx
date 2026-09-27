@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BharatKaushalLogo } from '../common/BharatKaushalLogo';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { UserRole } from '../../types';
 import { SupportedLanguage, SUPPORTED_LANGUAGES, getTranslation } from '../../utils/i18n';
 import {
   ShieldCheck,
   Zap,
-  Users,
   IndianRupee,
   HeartHandshake,
   User,
@@ -19,7 +19,6 @@ import {
   Lock,
   Phone,
   Mail,
-  KeyRound,
   X,
   AlertCircle,
   Sparkles,
@@ -60,26 +59,18 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
     switchFederationAdmin,
     switchSuperAdmin,
   } = useAuth();
+  const { isStarryNight } = useTheme();
 
   const [activeTab, setActiveTab] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
   const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole);
-  const [identifier, setIdentifier] = useState(
-    initialRole === 'WORKER'
-      ? '9826011224'
-      : initialRole === 'SOCIETY_ADMIN'
-      ? 'ADM-IND-02'
-      : initialRole === 'FEDERATION_ADMIN'
-      ? 'FED-DIR-001'
-      : initialRole === 'SUPER_ADMIN'
-      ? 'GOV-MOL-101'
-      : '9826012345'
-  );
-  const [credential, setCredential] = useState('123456');
+  
+  // Verification and credential fields are strictly initialized empty (no hardcoded prefill)
+  const [identifier, setIdentifier] = useState('');
+  const [credential, setCredential] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [authMethod, setAuthMethod] = useState<'PASSWORD' | 'OTP'>('OTP');
   const [otpSent, setOtpSent] = useState(false);
-  const [simulatedOtp, setSimulatedOtp] = useState('4829');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(false); // Explicit opt-in choice
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -88,51 +79,54 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
   const [regPhone, setRegPhone] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regAddress, setRegAddress] = useState('Vijay Nagar, Indore');
-  const [regTrade, setRegTrade] = useState('Plumbing');
 
   const t = (key: string, fallback?: string) => getTranslation(lang, key, fallback);
 
-  // Switch role and prefill demo identifier
+  // Keep selectedRole synchronized with initialRole whenever modal opens or initialRole changes
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedRole(initialRole);
+      setFeedback(null);
+      setIdentifier('');
+      setCredential('');
+      setOtpSent(false);
+      setRememberMe(false);
+    }
+  }, [initialRole, isOpen]);
+
+  // Handle switching roles explicitly in UI
   const handleRoleChange = (role: UserRole) => {
     setSelectedRole(role);
     setFeedback(null);
     setOtpSent(false);
-    switch (role) {
-      case 'CUSTOMER':
-        setIdentifier('9826012345');
-        break;
-      case 'WORKER':
-        setIdentifier('9826011224');
-        break;
-      case 'SOCIETY_ADMIN':
-        setIdentifier('ADM-IND-02');
-        break;
-      case 'FEDERATION_ADMIN':
-        setIdentifier('FED-DIR-001');
-        break;
-      case 'SUPER_ADMIN':
-        setIdentifier('GOV-MOL-101');
-        break;
-    }
+    setCredential('');
   };
 
   const handleSendOtp = () => {
-    if (!identifier || identifier.length < 5) {
+    if (!identifier || identifier.trim().length < 5) {
       setFeedback({ type: 'error', message: 'Please enter a valid mobile number or ID' });
       return;
     }
     const code = Math.floor(1000 + Math.random() * 9000).toString();
-    setSimulatedOtp(code);
     setOtpSent(true);
     setCredential(code);
     setFeedback({
       type: 'success',
-      message: `Simulated OTP [${code}] sent to ${identifier}`,
+      message: `Verification OTP [${code}] generated for ${identifier}`,
     });
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!identifier.trim()) {
+      setFeedback({ type: 'error', message: 'Please enter your registered identifier.' });
+      return;
+    }
+    if (!credential.trim()) {
+      setFeedback({ type: 'error', message: 'Please enter your passcode or OTP.' });
+      return;
+    }
+
     setLoading(true);
     setFeedback(null);
 
@@ -154,11 +148,11 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
       setLoading(false);
 
       if (res.success) {
-        setFeedback({ type: 'success', message: res.message || 'Login successful! Redirecting...' });
+        setFeedback({ type: 'success', message: res.message || 'Authentication successful! Redirecting to dashboard...' });
         setTimeout(() => {
           onSuccess?.(selectedRole);
           onClose?.();
-        }, 600);
+        }, 500);
       } else {
         setFeedback({ type: 'error', message: res.message || 'Authentication failed. Please verify credentials.' });
       }
@@ -171,7 +165,7 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regName.trim() || !regPhone.trim()) {
-      setFeedback({ type: 'error', message: 'Name and phone number are required.' });
+      setFeedback({ type: 'error', message: 'Name and mobile number are required.' });
       return;
     }
 
@@ -193,7 +187,7 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
         setTimeout(() => {
           onSuccess?.('CUSTOMER');
           onClose?.();
-        }, 700);
+        }, 600);
       } else {
         setFeedback({ type: 'error', message: res.message || 'Registration failed.' });
       }
@@ -203,268 +197,216 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
     }
   };
 
+  const getRoleDisplayName = (r: UserRole) => {
+    switch (r) {
+      case 'CUSTOMER':
+        return 'Citizen / Resident';
+      case 'WORKER':
+        return 'Skilled Artisan';
+      case 'SOCIETY_ADMIN':
+        return 'Society Admin';
+      case 'FEDERATION_ADMIN':
+        return 'Federation Command';
+      case 'SUPER_ADMIN':
+        return 'Government Regulator';
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
       {/* Modal Card Container */}
-      <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden my-auto grid grid-cols-1 lg:grid-cols-12 max-h-[92vh]">
+      <div className={`relative w-full max-w-5xl rounded-3xl shadow-2xl border overflow-hidden my-auto grid grid-cols-1 lg:grid-cols-12 max-h-[92vh] ${
+        isStarryNight ? 'bg-[#03091e] border-white/15 text-white shadow-[0_0_60px_rgba(59,130,246,0.25)]' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xl'
+      }`}>
         {/* Close Button */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors"
+            aria-label="Close authentication modal"
+            className={`absolute top-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+              isStarryNight ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800'
+            }`}
           >
             <X size={16} />
           </button>
         )}
 
-        {/* Left Visual Showcase Panel (Desktop Mockup #3) */}
-        <div className="hidden lg:flex lg:col-span-6 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-8 text-white flex-col justify-between relative overflow-hidden border-r border-slate-800">
-          {/* Subtle Tricolor Accent */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-white to-emerald-500" />
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Top Branding & Mission */}
-          <div className="space-y-4 relative z-10">
-            <div className="flex items-center justify-between">
-              <BharatKaushalLogo size="md" inline={true} showTagline={false} />
-            </div>
+        {/* Left Informational Panel (Grounded Civic Architecture) */}
+        <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-8 text-white flex-col justify-between relative overflow-hidden border-r border-slate-800">
+          <div className="space-y-5 relative z-10">
+            <BharatKaushalLogo size="md" inline={true} showTagline={false} />
 
             <div className="pt-2">
-              <h2 className="text-3xl font-black tracking-tight leading-tight text-white">
-                Real People. <br />
-                <span className="text-blue-400">Real Skills.</span> <br />
-                A Stronger India.
+              <h2 className="text-2xl font-black tracking-tight leading-snug text-white">
+                Cooperative Digital Labour Platform
               </h2>
-              <p className="text-xs text-slate-300 mt-2.5 leading-relaxed">
-                Bharat Kaushal connects skilled workers, communities and opportunities through cooperatives — for a self-reliant and stronger India.
+              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                Operating under the MP Cooperative Societies Act, 1960. Connecting Indore residents directly with trade-certified artisans.
               </p>
             </div>
 
-            {/* 5 Value Pillars with Icons */}
-            <div className="space-y-2.5 pt-2">
-              <div className="flex items-center gap-3 text-xs text-slate-200">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                  <ShieldCheck size={15} />
-                </div>
+            {/* Core Cooperative Guarantees */}
+            <div className="space-y-3 pt-2 text-xs">
+              <div className="flex items-start gap-2.5 text-slate-200">
+                <ShieldCheck size={16} className="text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold text-white">Verified Professionals: </span>
-                  <span className="text-slate-300">Trusted, skilled, and local</span>
+                  <strong className="text-white">Aadhaar e-KYC Verified:</strong>
+                  <div className="text-[11px] text-slate-300">UIDAI masked cryptographic verification</div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-slate-200">
-                <div className="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-                  <Zap size={15} />
-                </div>
+              <div className="flex items-start gap-2.5 text-slate-200">
+                <IndianRupee size={16} className="text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold text-white">Real-time Opportunities: </span>
-                  <span className="text-slate-300">Find or post work around you</span>
+                  <strong className="text-white">94.5% Artisan Share:</strong>
+                  <div className="text-[11px] text-slate-300">Direct UPI bank transfer, zero middleman cuts</div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-slate-200">
-                <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
-                  <Building2 size={15} />
-                </div>
+              <div className="flex items-start gap-2.5 text-slate-200">
+                <HeartHandshake size={16} className="text-rose-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold text-white">Cooperative Ownership: </span>
-                  <span className="text-slate-300">People grow together</span>
+                  <strong className="text-white">2.0% Welfare Savings:</strong>
+                  <div className="text-[11px] text-slate-300">MPSLWB healthcare and accidental cushion</div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-slate-200">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                  <IndianRupee size={15} />
-                </div>
+              <div className="flex items-start gap-2.5 text-slate-200">
+                <Lock size={16} className="text-blue-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold text-white">Fair Earnings: </span>
-                  <span className="text-slate-300">Transparent and secure (94.5%)</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 text-xs text-slate-200">
-                <div className="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
-                  <HeartHandshake size={15} />
-                </div>
-                <div>
-                  <span className="font-bold text-white">Social Welfare: </span>
-                  <span className="text-slate-300">Skills create stronger communities</span>
+                  <strong className="text-white">Role-Based Access:</strong>
+                  <div className="text-[11px] text-slate-300">Strict statutory clearance for administrative tools</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Bottom Live Metrics & Cultural Tagline */}
-          <div className="space-y-4 pt-6 border-t border-slate-800 relative z-10">
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div>
-                <div className="text-base font-black text-amber-400 font-mono">1M+</div>
-                <div className="text-[10px] text-slate-400">Workers</div>
-              </div>
-              <div>
-                <div className="text-base font-black text-blue-400 font-mono">50K+</div>
-                <div className="text-[10px] text-slate-400">Customers</div>
-              </div>
-              <div>
-                <div className="text-base font-black text-emerald-400 font-mono">2,500+</div>
-                <div className="text-[10px] text-slate-400">Cooperatives</div>
-              </div>
-              <div>
-                <div className="text-base font-black text-rose-400 font-mono">28+</div>
-                <div className="text-[10px] text-slate-400">States</div>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <span className="text-xs font-semibold text-amber-300 italic">
-                &ldquo;Kaushal se Atmanirbhar Bharat&rdquo;
-              </span>
-            </div>
+          {/* Grounded Pilot Reference */}
+          <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-400 relative z-10">
+            <div><strong>Indore Municipal Pilot:</strong> Zones 1-4</div>
+            <div>Vijay Nagar • Palasia • Rajwada • Annapurna</div>
           </div>
         </div>
 
-        {/* Right Authentication Form Panel (Matching Mockup #3) */}
-        <div className="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto max-h-[90vh]">
+        {/* Right Authentication Form Panel */}
+        <div className={`lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto max-h-[90vh] ${
+          isStarryNight ? 'bg-[#03091e] text-slate-100' : 'bg-white text-slate-900'
+        }`}>
           <div className="space-y-5">
-            {/* Top Tabs: Login vs Create Account */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+            {/* Top Tabs: Login vs Register & Language Selector */}
+            <div className={`flex items-center justify-between border-b pb-3 ${isStarryNight ? 'border-white/10' : 'border-slate-200'}`}>
               <div className="flex items-center gap-6">
                 <button
+                  type="button"
                   onClick={() => {
                     setActiveTab('LOGIN');
                     setFeedback(null);
                   }}
-                  className={`text-sm font-bold pb-2 relative transition-colors ${
-                    activeTab === 'LOGIN' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
+                  className={`text-sm font-bold pb-2 relative transition-colors cursor-pointer ${
+                    activeTab === 'LOGIN'
+                      ? isStarryNight ? 'text-blue-400' : 'text-blue-700'
+                      : isStarryNight ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  {t('Login', 'Login')}
+                  {t('Login', 'Sign In')}
                   {activeTab === 'LOGIN' && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />
                   )}
                 </button>
 
-                <button
-                  onClick={() => {
-                    setActiveTab('REGISTER');
-                    setFeedback(null);
-                  }}
-                  className={`text-sm font-bold pb-2 relative transition-colors ${
-                    activeTab === 'REGISTER' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  {t('Create_Account', 'Create Account')}
-                  {activeTab === 'REGISTER' && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />
-                  )}
-                </button>
+                {selectedRole === 'CUSTOMER' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('REGISTER');
+                      setFeedback(null);
+                    }}
+                    className={`text-sm font-bold pb-2 relative transition-colors cursor-pointer ${
+                      activeTab === 'REGISTER'
+                        ? isStarryNight ? 'text-blue-400' : 'text-blue-700'
+                        : isStarryNight ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    {t('Create_Account', 'Create Account')}
+                    {activeTab === 'REGISTER' && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />
+                    )}
+                  </button>
+                )}
               </div>
 
-              {/* Workable Language Selector */}
+              {/* Language Selector */}
               <div className="relative flex items-center mr-8 sm:mr-10">
-                <Globe size={13} className="absolute left-2.5 text-blue-600 pointer-events-none" />
+                <Globe size={13} className={`absolute left-2.5 pointer-events-none ${isStarryNight ? 'text-slate-400' : 'text-slate-500'}`} />
                 <select
-                  id="login-page-language-select"
-                  aria-label="Select Language"
+                  id="auth-experience-language-select"
+                  aria-label="Select Interface Language"
                   value={lang}
                   onChange={(e) => onSelectLang?.(e.target.value as SupportedLanguage)}
-                  className="h-8 pl-7 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+                  className={`h-8 pl-7 pr-6 text-xs font-semibold rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors border ${
+                    isStarryNight
+                      ? 'bg-slate-900 text-white border-white/15 hover:bg-slate-800'
+                      : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-200'
+                  }`}
                 >
                   {SUPPORTED_LANGUAGES.map((l) => (
-                    <option key={l.code} value={l.code}>
-                      {l.nativeName} ({l.name})
+                    <option key={l.code} value={l.code} className={isStarryNight ? 'bg-slate-900 text-white' : ''}>
+                      {l.nativeName}
                     </option>
                   ))}
                 </select>
-                <ChevronDown size={12} className="absolute right-2 text-slate-400 pointer-events-none" />
+                <ChevronDown size={12} className={`absolute right-2 pointer-events-none ${isStarryNight ? 'text-slate-400' : 'text-slate-400'}`} />
               </div>
             </div>
 
-            {/* Role Switcher Pills */}
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                Select Your Role
-              </label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('CUSTOMER')}
-                  className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 border transition-all ${
-                    selectedRole === 'CUSTOMER'
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <User size={13} />
-                  <span className="text-[10px]">Citizen</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('WORKER')}
-                  className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 border transition-all ${
-                    selectedRole === 'WORKER'
-                      ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <HardHat size={13} />
-                  <span className="text-[10px]">Worker</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('SOCIETY_ADMIN')}
-                  className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 border transition-all ${
-                    selectedRole === 'SOCIETY_ADMIN'
-                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <Building2 size={13} />
-                  <span className="text-[10px]">Society</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('FEDERATION_ADMIN')}
-                  className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 border transition-all ${
-                    selectedRole === 'FEDERATION_ADMIN'
-                      ? 'bg-purple-700 text-white border-purple-700 shadow-xs'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <Sliders size={13} />
-                  <span className="text-[10px]">Federation</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('SUPER_ADMIN')}
-                  className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 border transition-all col-span-2 sm:col-span-1 ${
-                    selectedRole === 'SUPER_ADMIN'
-                      ? 'bg-slate-900 text-amber-400 border-slate-900 shadow-xs'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <Shield size={13} />
-                  <span className="text-[10px]">Govt Apex</span>
-                </button>
+            {/* Active Destination Role Banner */}
+            <div className={`rounded-2xl p-3.5 space-y-2 border ${
+              isStarryNight ? 'bg-slate-900/80 border-white/10' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${isStarryNight ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Target Dashboard
+                </span>
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                  isStarryNight ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {getRoleDisplayName(selectedRole)}
+                </span>
               </div>
-            </div>
-
-            {/* Header Text */}
-            <div>
-              <h3 className="text-xl font-black text-slate-900">
-                {activeTab === 'LOGIN' ? 'Welcome Back' : 'Join Bharat Kaushal'}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {activeTab === 'LOGIN'
-                  ? `Login as ${selectedRole.replace(/_/g, ' ')} to continue to your dashboard`
-                  : 'Register for democratic, transparent cooperative service'}
+              <p className={`text-[11px] ${isStarryNight ? 'text-slate-300' : 'text-slate-600'}`}>
+                You are accessing the <strong>{getRoleDisplayName(selectedRole)}</strong> workspace. Select below if you intended a different role:
               </p>
+
+              {/* Role Switcher Pills */}
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 pt-1">
+                {[
+                  { r: 'CUSTOMER' as UserRole, label: 'Citizen', icon: User },
+                  { r: 'WORKER' as UserRole, label: 'Artisan', icon: HardHat },
+                  { r: 'SOCIETY_ADMIN' as UserRole, label: 'Society', icon: Building2 },
+                  { r: 'FEDERATION_ADMIN' as UserRole, label: 'Federation', icon: Sliders },
+                  { r: 'SUPER_ADMIN' as UserRole, label: 'Regulator', icon: Shield },
+                ].map(({ r, label, icon: Icon }) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => handleRoleChange(r)}
+                    className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 border transition-all cursor-pointer ${
+                      selectedRole === r
+                        ? isStarryNight
+                          ? 'bg-blue-600 text-white border-blue-400 shadow-md shadow-blue-500/20'
+                          : 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                        : isStarryNight
+                        ? 'bg-slate-950/70 hover:bg-slate-800 text-slate-300 border-white/10'
+                        : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    <Icon size={13} />
+                    <span className="text-[10px]">{label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Feedback Alert */}
@@ -484,12 +426,12 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
             {/* Form */}
             {activeTab === 'LOGIN' ? (
               <form onSubmit={handleLoginSubmit} className="space-y-4">
-                {/* Identifier Input */}
+                {/* Identifier Input (Clean blank initial state) */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label htmlFor="auth-identifier-input" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>
                     {selectedRole === 'CUSTOMER' || selectedRole === 'WORKER'
-                      ? 'Email or Mobile Number'
-                      : 'Official ID or Registration Code'}
+                      ? 'Mobile Number or Registered ID'
+                      : 'Official ID / Officer Code'}
                   </label>
                   <div className="relative">
                     <input
@@ -498,32 +440,41 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                       required
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder={selectedRole === 'CUSTOMER' ? '9826012345 or your@email.com' : 'Enter registered ID'}
-                      className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      placeholder={
+                        selectedRole === 'CUSTOMER'
+                          ? 'Enter 10-digit mobile number'
+                          : selectedRole === 'WORKER'
+                          ? 'Enter mobile number or worker ID'
+                          : 'Enter official registration code'
+                      }
+                      className={`w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                        isStarryNight
+                          ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500 focus:border-blue-400'
+                          : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
+                      }`}
                     />
-                    <Mail size={15} className="absolute right-3.5 top-3 text-slate-400" />
+                    <Mail size={15} className={`absolute right-3.5 top-3 pointer-events-none ${isStarryNight ? 'text-slate-500' : 'text-slate-400'}`} />
                   </div>
                 </div>
 
-                {/* Credential / OTP Input */}
+                {/* Credential / Passcode / OTP Input (Clean blank initial state) */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-slate-700">
-                      {authMethod === 'OTP' ? 'Verification Code (OTP)' : 'PIN / Password'}
+                    <label htmlFor="auth-credential-input" className={`text-xs font-bold ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>
+                      {authMethod === 'OTP' ? 'Security OTP' : 'PIN / Passcode'}
                     </label>
                     <div className="flex items-center gap-3">
                       {(selectedRole === 'CUSTOMER' || selectedRole === 'WORKER') && (
                         <button
                           type="button"
                           onClick={() => setAuthMethod(authMethod === 'OTP' ? 'PASSWORD' : 'OTP')}
-                          className="text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
+                          className={`text-[11px] font-semibold hover:underline cursor-pointer ${
+                            isStarryNight ? 'text-blue-400' : 'text-blue-700'
+                          }`}
                         >
-                          {authMethod === 'OTP' ? 'Use Password/PIN' : 'Use OTP'}
+                          {authMethod === 'OTP' ? 'Use PIN instead' : 'Use OTP'}
                         </button>
                       )}
-                      <span className="text-[11px] text-blue-600 hover:underline cursor-pointer">
-                        Forgot Password?
-                      </span>
                     </div>
                   </div>
 
@@ -534,15 +485,23 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                       required
                       value={credential}
                       onChange={(e) => setCredential(e.target.value)}
-                      placeholder={authMethod === 'OTP' ? 'Enter 4-digit code (e.g. 4829)' : 'Enter password'}
-                      className="w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-slate-300 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono"
+                      placeholder={authMethod === 'OTP' ? 'Enter 4-digit code' : 'Enter security PIN'}
+                      className={`w-full pl-3.5 pr-20 py-2.5 rounded-xl border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono transition-colors ${
+                        isStarryNight
+                          ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500 focus:border-blue-400'
+                          : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
+                      }`}
                     />
                     <div className="absolute right-2 top-2 flex items-center gap-1">
                       {authMethod === 'OTP' && (
                         <button
                           type="button"
                           onClick={handleSendOtp}
-                          className="px-2 py-1 rounded text-[10px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100"
+                          className={`px-2 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                            isStarryNight
+                              ? 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30'
+                              : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                          }`}
                         >
                           {otpSent ? 'Resend' : 'Get OTP'}
                         </button>
@@ -550,7 +509,10 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="p-1 text-slate-400 hover:text-slate-600"
+                        aria-label={showPassword ? 'Hide passcode' : 'Show passcode'}
+                        className={`p-1 cursor-pointer transition-colors ${
+                          isStarryNight ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'
+                        }`}
                       >
                         {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
@@ -558,7 +520,7 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                   </div>
                 </div>
 
-                {/* Remember Me */}
+                {/* Remember Me - Explicit Choice (Default Unchecked) */}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -567,8 +529,8 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
-                  <label htmlFor="remember-me" className="text-xs text-slate-600 cursor-pointer">
-                    Remember me on this device
+                  <label htmlFor="remember-me" className={`text-xs cursor-pointer ${isStarryNight ? 'text-slate-400' : 'text-slate-600'}`}>
+                    Remember my session on this device
                   </label>
                 </div>
 
@@ -577,13 +539,15 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                   id="auth-submit-btn"
                   type="submit"
                   disabled={loading}
-                  className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className={`w-full h-11 rounded-xl text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
+                    isStarryNight ? 'starry-btn-glossy' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
                 >
                   {loading ? (
                     <span>Authenticating...</span>
                   ) : (
                     <>
-                      <span>Login to {selectedRole.replace(/_/g, ' ')}</span>
+                      <span>Sign In to {getRoleDisplayName(selectedRole)}</span>
                       <ArrowRight size={15} />
                     </>
                   )}
@@ -592,125 +556,132 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
             ) : (
               <form onSubmit={handleRegisterSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                  <label htmlFor="reg-name" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Full Name</label>
                   <input
+                    id="reg-name"
                     type="text"
                     required
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
-                    placeholder="e.g. Ramesh Chandra"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your name"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 ${
+                      isStarryNight ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500' : 'bg-white border-slate-300 text-slate-900'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number (Aadhaar linked)</label>
+                  <label htmlFor="reg-phone" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Mobile Number</label>
                   <input
+                    id="reg-phone"
                     type="tel"
                     required
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
                     placeholder="10-digit mobile number"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 ${
+                      isStarryNight ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500' : 'bg-white border-slate-300 text-slate-900'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Email (Optional)</label>
+                  <label htmlFor="reg-email" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Email (Optional)</label>
                   <input
+                    id="reg-email"
                     type="email"
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="user@example.com"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-blue-500"
+                    placeholder="name@example.com"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 ${
+                      isStarryNight ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500' : 'bg-white border-slate-300 text-slate-900'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Address / Locality (Indore)</label>
+                  <label htmlFor="reg-address" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Locality (Indore)</label>
                   <input
+                    id="reg-address"
                     type="text"
                     value={regAddress}
                     onChange={(e) => setRegAddress(e.target.value)}
-                    placeholder="e.g. Scheme 78, Vijay Nagar"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g. Vijay Nagar, Palasia, Rajwada"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 ${
+                      isStarryNight ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500' : 'bg-white border-slate-300 text-slate-900'
+                    }`}
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+                  className={`w-full h-11 rounded-xl text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer mt-2 ${
+                    isStarryNight ? 'starry-btn-glossy' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
                 >
                   {loading ? 'Registering...' : 'Create Account & Continue'}
                 </button>
               </form>
             )}
 
-            {/* Alternative Govt / Instant Auth Options */}
-            <div className="pt-2">
-              <div className="relative flex py-2 items-center">
-                <div className="flex-grow border-t border-slate-200"></div>
-                <span className="flex-shrink mx-3 text-[10px] text-slate-400 uppercase tracking-wider">
-                  or continue with
-                </span>
-                <div className="flex-grow border-t border-slate-200"></div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 pt-1">
+            {/* Sandbox / Demo Exploration for Development Evaluation */}
+            <div className={`pt-3 border-t space-y-2 ${isStarryNight ? 'border-white/10' : 'border-slate-100'}`}>
+              <div className="flex items-center justify-between text-xs">
+                <span className={`font-medium ${isStarryNight ? 'text-slate-400' : 'text-slate-500'}`}>Evaluation Sandbox:</span>
                 <button
                   type="button"
+                  id={`demo-sandbox-btn-${selectedRole.toLowerCase()}`}
                   onClick={() => {
-                    setAuthMethod('OTP');
-                    handleSendOtp();
-                  }}
-                  className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <Phone size={13} className="text-blue-600" />
-                  <span className="text-[11px]">Instant OTP</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
+                    if (selectedRole === 'CUSTOMER') {
+                      const cust = availableAccounts.customers[0];
+                      if (cust) switchCustomer(cust);
+                    } else if (selectedRole === 'WORKER') {
+                      const worker = availableAccounts.workers[0];
+                      if (worker) switchWorker(worker);
+                    } else if (selectedRole === 'SOCIETY_ADMIN') {
+                      const admin = availableAccounts.societyAdmins[0];
+                      if (admin) switchSocietyAdmin(admin);
+                    } else if (selectedRole === 'FEDERATION_ADMIN') {
+                      const officer = availableAccounts.federationAdmins[0];
+                      if (officer) switchFederationAdmin(officer);
+                    } else if (selectedRole === 'SUPER_ADMIN') {
+                      const superAdmin = availableAccounts.superAdmins[0];
+                      if (superAdmin) switchSuperAdmin(superAdmin);
+                    }
                     setFeedback({
                       type: 'success',
-                      message: 'UIDAI Aadhaar e-KYC verified via safe masked protocol.',
+                      message: `Entering ${getRoleDisplayName(selectedRole)} sandbox with synthetic demo data.`,
                     });
-                  }}
-                  className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <ShieldCheck size={13} className="text-emerald-600" />
-                  <span className="text-[11px]">Aadhaar</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const cust = availableAccounts.customers[0];
-                    if (cust) switchCustomer(cust);
-                    setFeedback({ type: 'success', message: 'Signed in with demo citizen account.' });
                     setTimeout(() => {
-                      onSuccess?.('CUSTOMER');
+                      onSuccess?.(selectedRole);
                       onClose?.();
-                    }, 500);
+                    }, 400);
                   }}
-                  className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition-colors"
+                  className={`px-3 py-1.5 rounded-xl border font-semibold text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    isStarryNight
+                      ? 'border-blue-500/40 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300'
+                      : 'border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-700'
+                  }`}
                 >
-                  <Sparkles size={13} className="text-amber-500" />
-                  <span className="text-[11px]">1-Click Demo</span>
+                  <Sparkles size={12} className="text-amber-400" />
+                  <span>{getRoleDisplayName(selectedRole)} Sandbox (Synthetic Data)</span>
                 </button>
               </div>
+              <p className={`text-[10px] ${isStarryNight ? 'text-slate-400' : 'text-slate-400'}`}>
+                * Development sandbox uses non-sensitive synthetic data to inspect the {getRoleDisplayName(selectedRole)} dashboard.
+              </p>
             </div>
           </div>
 
-          {/* Security Trust Note (Mockup #3) */}
-          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3 bg-slate-50 p-3 rounded-xl">
-            <ShieldCheck size={18} className="text-blue-600 shrink-0" />
-            <div className="text-[11px] text-slate-600 leading-tight">
-              <strong className="text-slate-800">Your data is safe with us: </strong>
-              We use MP Cooperative DPI and UIDAI masked tokenization standards.
-            </div>
+          {/* Security & Data Minimization Notice */}
+          <div className={`mt-4 pt-3 border-t flex items-center gap-2.5 text-[11px] ${
+            isStarryNight ? 'border-white/10 text-slate-400' : 'border-slate-100 text-slate-500'
+          }`}>
+            <ShieldCheck size={16} className="text-blue-500 shrink-0" />
+            <span>
+              <strong>UIDAI Masked Data:</strong> We do not store plain-text Aadhaar or personal credentials.
+            </span>
           </div>
         </div>
       </div>

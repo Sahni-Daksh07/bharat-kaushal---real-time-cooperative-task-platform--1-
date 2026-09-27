@@ -73,6 +73,32 @@ export const FederationCommandPortal: React.FC<FederationCommandPortalProps> = (
 
   return (
     <div className="space-y-6 dashboard-container" data-dashboard-container="true">
+      {/* Realtime Command Operations Visual Banner */}
+      <div className="relative rounded-3xl overflow-hidden border border-purple-500/20 shadow-2xl h-44 sm:h-52 w-full group">
+        <img
+          src="/images/cooperative_command.jpg"
+          alt="Indore Municipal Cooperative Command Operations"
+          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#020817]/95 via-[#020817]/75 to-transparent" />
+        <div className="absolute inset-0 p-5 sm:p-6 flex flex-col justify-between">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-950/80 text-purple-300 backdrop-blur-md border border-purple-500/40 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              Live Operations Telemetry &bull; Ward 1–85 Hub
+            </span>
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
+              Indore Municipal Cooperative Labour GIS Command Center
+            </h2>
+            <p className="text-xs text-slate-300 max-w-xl mt-1">
+              Real-time WebSocket telemetry tracking 146 standardized doorstep services across 4 civic labour zones under MP Cooperative Societies Act, 1960.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Federation Command Header */}
       <section className="bg-slate-900 text-white rounded-2xl p-4 sm:p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 dashboard-card" data-dashboard-card="true">
         <div className="flex flex-wrap items-center gap-4">

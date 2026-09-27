@@ -10,7 +10,8 @@
     <meta name="keywords" content="Bharat Kaushal, cooperative labour platform, skilled artisan network, home services Indore, digital public infrastructure, NSQF certified workers, fair wages India, electrician plumbing Indore, MP labour welfare fund" />
     <meta name="author" content="Bharat Kaushal Cooperative Digital Public Infrastructure" />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#0b132b" />
+    <meta name="theme-color" content="#0a0f2e" />
+    <meta name="google" content="notranslate" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -34,7 +35,7 @@
     <!-- Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
@@ -145,9 +146,17 @@
     </div>
     <script type="module" src="/src/main.tsx"></script>
   
-    <!-- Google Translate Script -->
+    <!-- Google Translate Script (Explicitly manual only) -->
     <div id="google_translate_element" style="display:none;"></div>
     <script type="text/javascript">
+      // Ensure Google Translate never runs automatically on initial load or from stale cookies
+      try {
+        if (!sessionStorage.getItem('bk_user_selected_lang')) {
+          document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname + ";";
+        }
+      } catch (e) {}
+
       function googleTranslateElementInit() {
         new google.translate.TranslateElement({
           pageLanguage: 'en',

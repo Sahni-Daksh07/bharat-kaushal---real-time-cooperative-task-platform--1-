@@ -46,8 +46,8 @@ export const FederationAdminAuthModal: React.FC<FederationAdminAuthModalProps> =
       setActiveTab(initialTab);
     }
   }, [initialTab, isOpen]);
-  const [officerId, setOfficerId] = useState(federationAdminUser?.id || 'FED-DIR-MP-001');
-  const [passcode, setPasscode] = useState('2026-MP-GOV');
+  const [officerId, setOfficerId] = useState('');
+  const [passcode, setPasscode] = useState('');
   const [clearanceLevel, setClearanceLevel] = useState<'LEVEL_4_EXECUTIVE' | 'LEVEL_3_DIRECTOR' | 'LEVEL_2_IMC_COMMAND'>('LEVEL_4_EXECUTIVE');
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);

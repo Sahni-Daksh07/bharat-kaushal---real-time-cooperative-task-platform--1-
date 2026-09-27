@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BharatKaushalLogo } from './BharatKaushalLogo';
+import { ThemeSwitcher } from './ThemeSwitcher';
 import { useRealtime } from '../../context/RealtimeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { SupportedLanguage, SUPPORTED_LANGUAGES, getTranslation } from '../../utils/i18n';
 import {
   Bell,
@@ -58,6 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenUnifiedAuth,
 }) => {
   const { connectionStatus, notifications, resetDemo, bookings } = useRealtime();
+  const { isStarryNight } = useTheme();
   const {
     customerUser,
     isCustomerAuthenticated,
@@ -504,9 +507,15 @@ export const Header: React.FC<HeaderProps> = ({
 
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs">
+    <header className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-colors duration-300 ${
+      isStarryNight
+        ? 'bg-[#020817]/92 border-white/10 shadow-2xl text-slate-100'
+        : 'bg-white/95 border-slate-200 shadow-xs text-slate-900'
+    }`}>
       {/* Top micro-bar for Helplines & Realtime Status */}
-      <div className="bg-slate-900 text-slate-300 text-xs px-3 sm:px-6 py-1 sm:py-1.5 flex flex-row items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800 min-w-0 overflow-hidden">
+      <div className={`text-xs px-3 sm:px-6 py-1 sm:py-1.5 flex flex-row items-center justify-between gap-1.5 sm:gap-2 border-b min-w-0 overflow-hidden ${
+        isStarryNight ? 'bg-[#070d1e] text-slate-300 border-white/5' : 'bg-slate-900 text-slate-300 border-slate-800'
+      }`}>
         <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs min-w-0 overflow-hidden">
           <div className="flex items-center gap-1 sm:gap-1.5 font-medium text-emerald-400 shrink-0">
             <Radio size={11} className={connectionStatus === 'CONNECTED' ? 'animate-pulse' : ''} />
@@ -559,6 +568,7 @@ export const Header: React.FC<HeaderProps> = ({
           
           {/* Mobile Quick Controls: Uniform touch targets, zero layout shift */}
           <div className="flex md:hidden items-center gap-1.5 shrink-0">
+            <ThemeSwitcher variant="icon" />
             <button
               id="btn-mobile-reset-demo"
               onClick={handleReset}
@@ -619,7 +629,9 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Multi-role Navigation Tabs - Dynamically adapts to any aspect ratio */}
-        <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold overflow-x-auto no-scrollbar scroll-smooth max-w-full shrink min-w-0">
+        <div className={`hidden md:flex items-center p-1 rounded-xl border text-xs font-semibold overflow-x-auto no-scrollbar scroll-smooth max-w-full shrink min-w-0 ${
+          isStarryNight ? 'bg-[#0b132b]/85 border-white/10' : 'bg-slate-100 border-slate-200'
+        }`}>
           <button
             id="nav-role-customer"
             onClick={() => onSelectRole('CUSTOMER')}
@@ -697,8 +709,11 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right Tools: Reset, Notifications, Desktop Toggle Menu */}
         <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full md:w-auto shrink-0">
 
-          {/* Desktop Action Tools Cluster: Reset, Notifications, Toggle Menu */}
+          {/* Desktop Action Tools Cluster: Theme Toggle, Reset, Notifications, Toggle Menu */}
           <div className="hidden md:flex items-center gap-1.5 shrink-0">
+            {/* Theme Switcher Toggle */}
+            <ThemeSwitcher variant="icon" />
+
             {/* Desktop Reset Demo State Button */}
             <button
               id="btn-reset-demo"

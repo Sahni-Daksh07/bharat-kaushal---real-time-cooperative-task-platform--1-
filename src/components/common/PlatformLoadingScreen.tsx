@@ -7,12 +7,29 @@ interface PlatformLoadingScreenProps {
 
 export const PlatformLoadingScreen: React.FC<PlatformLoadingScreenProps> = ({
   onLoaded,
-  durationMs = 1800,
+  durationMs = 650,
 }) => {
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const [isRemoved, setIsRemoved] = useState(false);
+  const [isRemoved, setIsRemoved] = useState(() => {
+    try {
+      return sessionStorage.getItem('bk_splash_shown') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
+    if (isRemoved) {
+      if (onLoaded) onLoaded();
+      return;
+    }
+
+    try {
+      sessionStorage.setItem('bk_splash_shown', 'true');
+    } catch {
+      // ignore
+    }
+
     const fadeTimer = setTimeout(() => {
       setIsFadingOut(true);
       if (onLoaded) onLoaded();
@@ -20,13 +37,13 @@ export const PlatformLoadingScreen: React.FC<PlatformLoadingScreenProps> = ({
 
     const removeTimer = setTimeout(() => {
       setIsRemoved(true);
-    }, durationMs + 700);
+    }, durationMs + 400);
 
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(removeTimer);
     };
-  }, [durationMs, onLoaded]);
+  }, [durationMs, onLoaded, isRemoved]);
 
   if (isRemoved) return null;
 

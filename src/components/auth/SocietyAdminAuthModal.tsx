@@ -45,10 +45,10 @@ export const SocietyAdminAuthModal: React.FC<SocietyAdminAuthModalProps> = ({
       setActiveTab(initialTab);
     }
   }, [initialTab, isOpen]);
-  const [societyId, setSocietyId] = useState(societyAdminUser?.societyId || 'SOC-IND-02');
-  const [staffCode, setStaffCode] = useState(societyAdminUser?.id || 'ADM-IND-02-77');
-  const [securityPin, setSecurityPin] = useState('7310');
-  const [dscTokenAttached, setDscTokenAttached] = useState(true);
+  const [societyId, setSocietyId] = useState('');
+  const [staffCode, setStaffCode] = useState('');
+  const [securityPin, setSecurityPin] = useState('');
+  const [dscTokenAttached, setDscTokenAttached] = useState(false);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
