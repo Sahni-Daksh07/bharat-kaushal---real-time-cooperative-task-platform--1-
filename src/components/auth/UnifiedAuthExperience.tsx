@@ -3,6 +3,7 @@ import { BharatKaushalLogo } from '../common/BharatKaushalLogo';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { UserRole } from '../../types';
+import { signInSupabaseUser } from '../../db/supabaseClient';
 import { SupportedLanguage, SUPPORTED_LANGUAGES, getTranslation } from '../../utils/i18n';
 import {
   ShieldCheck,
@@ -148,6 +149,11 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
       setLoading(false);
 
       if (res.success) {
+        // Authenticate with live Supabase Cloud session in parallel
+        signInSupabaseUser(selectedRole).catch((authErr) => {
+          console.warn('[Supabase Auth] Background session sync:', authErr);
+        });
+
         setFeedback({ type: 'success', message: res.message || 'Authentication successful! Redirecting to dashboard...' });
         setTimeout(() => {
           onSuccess?.(selectedRole);
