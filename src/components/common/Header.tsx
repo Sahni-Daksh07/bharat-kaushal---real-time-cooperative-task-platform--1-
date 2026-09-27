@@ -195,8 +195,16 @@ export const Header: React.FC<HeaderProps> = ({
 
   const activeAuthInfo = getRoleAuthInfo();
 
+  const itemHoverClass = isStarryNight
+    ? 'hover:bg-white/10 text-slate-200'
+    : 'hover:bg-slate-50 text-slate-700';
+  const dividerClass = isStarryNight ? 'bg-white/10' : 'bg-slate-100';
+  const selectClass = isStarryNight
+    ? 'bg-slate-800 text-slate-200 border-white/15 hover:bg-slate-700'
+    : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200/80';
+
   const renderToggleMenuItems = () => (
-    <div className="flex flex-col text-sm text-slate-700">
+    <div className={`flex flex-col text-sm ${isStarryNight ? 'text-slate-200' : 'text-slate-700'}`}>
       {currentRole === 'CUSTOMER' && (
         <>
           <button
@@ -205,9 +213,9 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_PROFILE'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <User size={16} className="text-slate-500" />
+            <User size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
             <span className="font-medium">{t('Profile', 'Profile')}</span>
           </button>
           {/* Demo Profiles Button */}
@@ -217,10 +225,12 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               openAuthModal('CUSTOMER', 'DEMO');
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <Users size={16} className="text-emerald-600" />
-            <span className="font-medium text-slate-800">{t('Demo_Profiles__3__ethvy', `Demo Profiles (${availableAccounts.customers.length})`)}</span>
+            <Users size={16} className="text-emerald-500" />
+            <span className={`font-medium ${isStarryNight ? 'text-white' : 'text-slate-800'}`}>
+              {t('Demo_Profiles__3__ethvy', `Demo Profiles (${availableAccounts.customers.length})`)}
+            </span>
           </button>
           <button
             id="btn-toggle-menu-booking-history-invoices"
@@ -228,23 +238,23 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_HISTORY'));
             }}
-            className="flex items-center justify-between px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left"
+            className={`flex items-center justify-between px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
             <div className="flex items-center gap-3">
-              <FileText size={16} className="text-slate-500" />
+              <FileText size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
               <span className="font-medium">{t('Booking_history___invoices', 'Booking history & invoices')}</span>
             </div>
             {bookings.some((b) => b.status === 'PAYMENT_PENDING') && (
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
                 Due
               </span>
             )}
           </button>
 
           {/* Language Selector in Customer Toggle Menu */}
-          <div className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
-            <div className="flex items-center gap-3 text-slate-700">
-              <Globe size={16} className="text-blue-600" />
+          <div className={`px-4 py-2.5 flex items-center justify-between gap-3 transition-colors ${itemHoverClass}`}>
+            <div className="flex items-center gap-3">
+              <Globe size={16} className="text-blue-500" />
               <span className="font-medium">{t('Language', 'Language')}</span>
             </div>
             <div className="relative">
@@ -255,10 +265,10 @@ export const Header: React.FC<HeaderProps> = ({
                 onChange={(e) => {
                   onSelectLang(e.target.value as SupportedLanguage);
                 }}
-                className="h-8 pl-2.5 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+                className={`h-8 pl-2.5 pr-6 text-xs font-semibold rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors border ${selectClass}`}
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
+                  <option key={l.code} value={l.code} className={isStarryNight ? 'bg-slate-900 text-white' : ''}>
                     {l.nativeName}
                   </option>
                 ))}
@@ -274,20 +284,20 @@ export const Header: React.FC<HeaderProps> = ({
               logoutCustomer();
               onNavigateHome?.();
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left text-rose-600 cursor-pointer"
+            className="flex items-center gap-3 px-4 py-2.5 hover:bg-rose-500/10 transition-colors w-full text-left text-rose-500 cursor-pointer"
           >
             <LogOut size={16} className="text-rose-500" />
             <span className="font-medium">{t('Logging_Out', 'Logging Out')}</span>
           </button>
-          <div className="h-px bg-slate-100 my-1 mx-2"></div>
+          <div className={`h-px my-1 mx-2 ${dividerClass}`}></div>
           <button
             onClick={() => {
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <LifeBuoy size={16} className="text-slate-500" />
+            <LifeBuoy size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
             <span className="font-medium">{t('Support', 'Support')}</span>
           </button>
           <button
@@ -295,9 +305,9 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <Headphones size={16} className="text-slate-500" />
+            <Headphones size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
             <span className="font-medium">{t('Customer_Care', 'Customer Care')}</span>
           </button>
         </>
@@ -311,9 +321,9 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_PROFILE'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <User size={16} className="text-slate-500" />
+            <User size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
             <span className="font-medium">{t('Profile', 'Profile')}</span>
           </button>
           {/* Switch Active Craftsman Button */}
@@ -323,10 +333,12 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               openAuthModal('WORKER', 'DEMO');
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <HardHat size={16} className="text-amber-600" />
-            <span className="font-medium text-slate-800">{t('Switch_Active_Craftsman___m3bbo', `Switch Active Craftsman (${availableAccounts.workers.length})`)}</span>
+            <HardHat size={16} className="text-amber-500" />
+            <span className={`font-medium ${isStarryNight ? 'text-white' : 'text-slate-800'}`}>
+              {t('Switch_Active_Craftsman___m3bbo', `Switch Active Craftsman (${availableAccounts.workers.length})`)}
+            </span>
           </button>
           <button
             id="btn-toggle-menu-order-card"
@@ -334,9 +346,9 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_ORDER_CARD'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <ClipboardList size={16} className="text-slate-500" />
+            <ClipboardList size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
             <span className="font-medium">{t('Order_Card', 'Order Card')}</span>
           </button>
           <button
@@ -345,16 +357,16 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_INCOME_HISTORY'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <Wallet size={16} className="text-slate-500" />
+            <Wallet size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
             <span className="font-medium">{t('Income_History', 'Income History')}</span>
           </button>
 
           {/* Language Selector in Worker Toggle Menu */}
-          <div className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
-            <div className="flex items-center gap-3 text-slate-700">
-              <Globe size={16} className="text-blue-600" />
+          <div className={`px-4 py-2.5 flex items-center justify-between gap-3 transition-colors ${itemHoverClass}`}>
+            <div className="flex items-center gap-3">
+              <Globe size={16} className="text-blue-500" />
               <span className="font-medium">{t('Language', 'Language')}</span>
             </div>
             <div className="relative">
@@ -365,10 +377,10 @@ export const Header: React.FC<HeaderProps> = ({
                 onChange={(e) => {
                   onSelectLang(e.target.value as SupportedLanguage);
                 }}
-                className="h-8 pl-2.5 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+                className={`h-8 pl-2.5 pr-6 text-xs font-semibold rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors border ${selectClass}`}
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
+                  <option key={l.code} value={l.code} className={isStarryNight ? 'bg-slate-900 text-white' : ''}>
                     {l.nativeName}
                   </option>
                 ))}
@@ -384,20 +396,20 @@ export const Header: React.FC<HeaderProps> = ({
               logoutWorker();
               onNavigateHome?.();
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left text-rose-600 cursor-pointer"
+            className="flex items-center gap-3 px-4 py-2.5 hover:bg-rose-500/10 transition-colors w-full text-left text-rose-500 cursor-pointer"
           >
             <LogOut size={16} className="text-rose-500" />
             <span className="font-medium">{t('Logging_Out', 'Logging Out')}</span>
           </button>
-          <div className="h-px bg-slate-100 my-1 mx-2"></div>
+          <div className={`h-px my-1 mx-2 ${dividerClass}`}></div>
           <button
             onClick={() => {
               setIsToggleMenuOpen(false);
               document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <LifeBuoy size={16} className="text-slate-500" />
+            <LifeBuoy size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
             <span className="font-medium">{t('Support', 'Support')}</span>
           </button>
         </>
@@ -412,10 +424,12 @@ export const Header: React.FC<HeaderProps> = ({
                 setIsToggleMenuOpen(false);
                 openAuthModal('SOCIETY_ADMIN', 'DEMO');
               }}
-              className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+              className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
             >
-              <Building2 size={16} className="text-blue-600" />
-              <span className="font-medium text-slate-800">{t('Society_Registrar_Roster___z6lfo', `Society Registrar Roster (${availableAccounts.societyAdmins.length})`)}</span>
+              <Building2 size={16} className="text-blue-500" />
+              <span className={`font-medium ${isStarryNight ? 'text-white' : 'text-slate-800'}`}>
+                {t('Society_Registrar_Roster___z6lfo', `Society Registrar Roster (${availableAccounts.societyAdmins.length})`)}
+              </span>
             </button>
           )}
 
@@ -426,10 +440,12 @@ export const Header: React.FC<HeaderProps> = ({
                 setIsToggleMenuOpen(false);
                 openAuthModal('FEDERATION_ADMIN', 'DEMO');
               }}
-              className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+              className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
             >
-              <Shield size={16} className="text-purple-600" />
-              <span className="font-medium text-slate-800">{t('Command_Officers___cmzy3', `Command Officers (${availableAccounts.federationAdmins.length})`)}</span>
+              <Shield size={16} className="text-purple-500" />
+              <span className={`font-medium ${isStarryNight ? 'text-white' : 'text-slate-800'}`}>
+                {t('Command_Officers___cmzy3', `Command Officers (${availableAccounts.federationAdmins.length})`)}
+              </span>
             </button>
           )}
 
@@ -440,10 +456,12 @@ export const Header: React.FC<HeaderProps> = ({
                 setIsToggleMenuOpen(false);
                 openAuthModal('SUPER_ADMIN', 'DEMO');
               }}
-              className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+              className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
             >
-              <ShieldCheck size={16} className="text-amber-600" />
-              <span className="font-medium text-slate-800">{t('Authorized_Dignitaries_g1hey', `Authorized Dignitaries`)}</span>
+              <ShieldCheck size={16} className="text-amber-500" />
+              <span className={`font-medium ${isStarryNight ? 'text-white' : 'text-slate-800'}`}>
+                {t('Authorized_Dignitaries_g1hey', `Authorized Dignitaries`)}
+              </span>
             </button>
           )}
 
@@ -454,16 +472,18 @@ export const Header: React.FC<HeaderProps> = ({
               setIsToggleMenuOpen(false);
               onOpenBenchmark();
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left cursor-pointer"
+            className={`flex items-center gap-3 px-4 py-2.5 transition-colors w-full text-left cursor-pointer ${itemHoverClass}`}
           >
-            <Database size={16} className="text-emerald-600" />
-            <span className="font-medium text-emerald-800">{t('pricingDataset', 'Pricing Dataset (140)')}</span>
+            <Database size={16} className="text-emerald-500" />
+            <span className={`font-medium ${isStarryNight ? 'text-emerald-400' : 'text-emerald-800'}`}>
+              {t('pricingDataset', 'Pricing Dataset (140)')}
+            </span>
           </button>
 
           {/* Language Selector in Admin Toggle Menu */}
-          <div className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
-            <div className="flex items-center gap-3 text-slate-700">
-              <Globe size={16} className="text-blue-600" />
+          <div className={`px-4 py-2.5 flex items-center justify-between gap-3 transition-colors ${itemHoverClass}`}>
+            <div className="flex items-center gap-3">
+              <Globe size={16} className="text-blue-500" />
               <span className="font-medium">{t('Language', 'Language')}</span>
             </div>
             <div className="relative">
@@ -474,10 +494,10 @@ export const Header: React.FC<HeaderProps> = ({
                 onChange={(e) => {
                   onSelectLang(e.target.value as SupportedLanguage);
                 }}
-                className="h-8 pl-2.5 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+                className={`h-8 pl-2.5 pr-6 text-xs font-semibold rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none transition-colors border ${selectClass}`}
               >
                 {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
+                  <option key={l.code} value={l.code} className={isStarryNight ? 'bg-slate-900 text-white' : ''}>
                     {l.nativeName}
                   </option>
                 ))}
@@ -495,7 +515,7 @@ export const Header: React.FC<HeaderProps> = ({
               else if (currentRole === 'SUPER_ADMIN') logoutSuperAdmin();
               onNavigateHome?.();
             }}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors w-full text-left text-rose-600 cursor-pointer"
+            className="flex items-center gap-3 px-4 py-2.5 hover:bg-rose-500/10 transition-colors w-full text-left text-rose-500 cursor-pointer"
           >
             <LogOut size={16} className="text-rose-500" />
             <span className="font-medium">{t('Logging_Out', 'Logging Out')}</span>
@@ -505,12 +525,11 @@ export const Header: React.FC<HeaderProps> = ({
     </div>
   );
 
-
   return (
-    <header className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-colors duration-300 ${
+    <header className={`sticky top-0 z-40 backdrop-blur-2xl border-b transition-colors duration-300 ${
       isStarryNight
-        ? 'bg-[#020817]/92 border-white/10 shadow-2xl text-slate-100'
-        : 'bg-white/95 border-slate-200 shadow-xs text-slate-900'
+        ? 'bg-[#020817]/92 border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)] text-slate-100'
+        : 'bg-white/95 border-slate-200/90 shadow-xs text-slate-900'
     }`}>
       {/* Top micro-bar for Helplines & Realtime Status */}
       <div className={`text-xs px-3 sm:px-6 py-1 sm:py-1.5 flex flex-row items-center justify-between gap-1.5 sm:gap-2 border-b min-w-0 overflow-hidden ${
@@ -518,7 +537,7 @@ export const Header: React.FC<HeaderProps> = ({
       }`}>
         <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs min-w-0 overflow-hidden">
           <div className="flex items-center gap-1 sm:gap-1.5 font-medium text-emerald-400 shrink-0">
-            <Radio size={11} className={connectionStatus === 'CONNECTED' ? 'animate-pulse' : ''} />
+            <Radio size={11} className={connectionStatus === 'CONNECTED' ? 'animate-pulse text-emerald-400' : 'text-amber-400'} />
             <span className="hidden sm:inline">{connectionStatus === 'CONNECTED' ? 'WebSockets: Live Sync' : 'Reconnecting...'}</span>
             <span className="sm:hidden">{connectionStatus === 'CONNECTED' ? 'Live' : '...'}</span>
           </div>
@@ -574,7 +593,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={handleReset}
               disabled={isResetting}
               title={t('Refresh_and_reset_data', `Refresh & Reset System Data`)}
-              className="w-9 h-9 flex items-center justify-center text-slate-600 active:bg-slate-200 bg-slate-100 hover:bg-slate-200/80 rounded-xl transition-colors shrink-0"
+              className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors shrink-0 cursor-pointer ${
+                isStarryNight
+                  ? 'bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 active:bg-white/20'
+                  : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 border border-slate-200/80 active:bg-slate-200'
+              }`}
             >
               <RotateCcw size={15} className={isResetting ? 'animate-spin' : ''} />
             </button>
@@ -585,46 +608,64 @@ export const Header: React.FC<HeaderProps> = ({
                 if (isToggleMenuOpen) setIsToggleMenuOpen(false);
               }}
               title={t('Notifications', 'Notifications')}
-              className="w-9 h-9 flex items-center justify-center text-slate-600 active:bg-slate-200 bg-slate-100 hover:bg-slate-200/80 rounded-xl transition-colors relative shrink-0"
+              className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors relative shrink-0 cursor-pointer ${
+                showNotifications
+                  ? isStarryNight
+                    ? 'bg-blue-500/20 border border-blue-400/40 text-blue-300'
+                    : 'bg-blue-50 border border-blue-200 text-blue-700'
+                  : isStarryNight
+                  ? 'bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 active:bg-white/20'
+                  : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 border border-slate-200/80 active:bg-slate-200'
+              }`}
             >
               <Bell size={17} />
               {notifications.length > 0 && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white"></span>
+                <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full ring-2 ring-blue-400 animate-pulse"></span>
               )}
             </button>
-              <div className="relative shrink-0 flex items-center">
-                <button
-                  id="btn-mobile-toggle-menu"
-                  onClick={() => {
-                    const nextState = !isToggleMenuOpen;
-                    setIsToggleMenuOpen(nextState);
-                    if (showNotifications) setShowNotifications(false);
-                  }}
-                  title={t('Menu', 'Menu')}
-                  className={`w-9 h-9 flex items-center justify-center text-slate-600 active:bg-slate-200 rounded-xl transition-colors shrink-0 cursor-pointer ${
-                    isToggleMenuOpen ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 hover:bg-slate-200/80'
-                  }`}
-                >
-                  <Menu size={17} />
-                </button>
+            <div className="relative shrink-0 flex items-center">
+              <button
+                id="btn-mobile-toggle-menu"
+                onClick={() => {
+                  const nextState = !isToggleMenuOpen;
+                  setIsToggleMenuOpen(nextState);
+                  if (showNotifications) setShowNotifications(false);
+                }}
+                title={t('Menu', 'Menu')}
+                className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors shrink-0 cursor-pointer ${
+                  isToggleMenuOpen
+                    ? isStarryNight
+                      ? 'bg-blue-500/20 border border-blue-400/40 text-blue-300'
+                      : 'bg-blue-50 border border-blue-200 text-blue-700'
+                    : isStarryNight
+                    ? 'bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 active:bg-white/20'
+                    : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 border border-slate-200/80 active:bg-slate-200'
+                }`}
+              >
+                <Menu size={17} />
+              </button>
 
-                {isToggleMenuOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-[0.5px]"
-                      onClick={() => {
-                        setIsToggleMenuOpen(false);
-                      }}
-                    />
-                    <div
-                      ref={mobileMenuContainerRef}
-                      className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-xs bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto"
-                    >
-                      {renderToggleMenuItems()}
-                    </div>
-                  </>
-                )}
-              </div>
+              {isToggleMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-[1px]"
+                    onClick={() => {
+                      setIsToggleMenuOpen(false);
+                    }}
+                  />
+                  <div
+                    ref={mobileMenuContainerRef}
+                    className={`absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-xs rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto ${
+                      isStarryNight
+                        ? 'bg-[#0b132b]/95 border border-white/15 text-slate-100 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)]'
+                        : 'bg-white border border-slate-200/90 text-slate-900 shadow-2xl'
+                    }`}
+                  >
+                    {renderToggleMenuItems()}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -635,9 +676,11 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="nav-role-customer"
             onClick={() => onSelectRole('CUSTOMER')}
-            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               currentRole === 'CUSTOMER'
                 ? 'bg-blue-600 text-white shadow-xs'
+                : isStarryNight
+                ? 'text-slate-300 hover:text-white hover:bg-white/10'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
@@ -648,9 +691,11 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="nav-role-worker"
             onClick={() => onSelectRole('WORKER')}
-            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               currentRole === 'WORKER'
                 ? 'bg-blue-600 text-white shadow-xs'
+                : isStarryNight
+                ? 'text-slate-300 hover:text-white hover:bg-white/10'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
@@ -661,9 +706,11 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="nav-role-society"
             onClick={() => onSelectRole('SOCIETY_ADMIN')}
-            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               currentRole === 'SOCIETY_ADMIN'
                 ? 'bg-blue-600 text-white shadow-xs'
+                : isStarryNight
+                ? 'text-slate-300 hover:text-white hover:bg-white/10'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
@@ -677,9 +724,11 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="nav-role-federation"
             onClick={() => onSelectRole('FEDERATION_ADMIN')}
-            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               currentRole === 'FEDERATION_ADMIN'
                 ? 'bg-blue-600 text-white shadow-xs'
+                : isStarryNight
+                ? 'text-slate-300 hover:text-white hover:bg-white/10'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
@@ -693,15 +742,17 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="nav-role-super-admin"
             onClick={() => onSelectRole('SUPER_ADMIN')}
-            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all font-bold shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 lg:px-3.5 py-1.5 rounded-lg transition-all font-bold shrink-0 whitespace-nowrap cursor-pointer ${
               currentRole === 'SUPER_ADMIN'
                 ? 'bg-amber-600 text-white shadow-xs'
+                : isStarryNight
+                ? 'text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30'
                 : 'text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200'
             }`}
           >
-            <Shield size={14} className={`shrink-0 ${currentRole === 'SUPER_ADMIN' ? 'text-white' : 'text-amber-600'}`} />
+            <Shield size={14} className={`shrink-0 ${currentRole === 'SUPER_ADMIN' ? 'text-white' : 'text-amber-500'}`} />
             <span>{t('Super_Admin_d4d1r', `Super Admin`)}</span>
-            <span className="hidden xl:inline text-[9px] bg-amber-200 text-amber-950 px-1 rounded uppercase tracking-wider font-mono">
+            <span className="hidden xl:inline text-[9px] bg-amber-400/20 text-amber-300 px-1 rounded uppercase tracking-wider font-mono">
               {t('Govt_2ti61', `Govt`)}</span>
           </button>
         </div>
@@ -720,7 +771,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={handleReset}
               disabled={isResetting}
               title={t('Refresh_and_reset_data', `Refresh & Reset System Data`)}
-              className="w-9 h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/80 rounded-xl transition-colors shrink-0"
+              className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors shrink-0 cursor-pointer border ${
+                isStarryNight
+                  ? 'text-slate-300 hover:text-white hover:bg-white/10 border-white/10 active:bg-white/20'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-slate-200/80 active:bg-slate-200'
+              }`}
             >
               <RotateCcw size={16} className={isResetting ? 'animate-spin' : ''} />
             </button>
@@ -734,13 +789,19 @@ export const Header: React.FC<HeaderProps> = ({
                   if (isToggleMenuOpen) setIsToggleMenuOpen(false);
                 }}
                 title={t('Notifications', 'Notifications')}
-                className={`w-9 h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 border rounded-xl transition-colors relative shrink-0 ${
-                  showNotifications ? 'bg-slate-100 border-slate-300 text-slate-900' : 'border-slate-200/80'
+                className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors relative shrink-0 cursor-pointer border ${
+                  showNotifications
+                    ? isStarryNight
+                      ? 'bg-blue-500/20 border-blue-400/40 text-blue-300'
+                      : 'bg-blue-50 border-blue-200 text-blue-700'
+                    : isStarryNight
+                    ? 'text-slate-300 hover:text-white hover:bg-white/10 border-white/10'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-slate-200/80'
                 }`}
               >
                 <Bell size={17} />
                 {notifications.length > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white"></span>
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full ring-2 ring-blue-400 animate-pulse"></span>
                 )}
               </button>
             </div>
@@ -755,8 +816,14 @@ export const Header: React.FC<HeaderProps> = ({
                   if (showNotifications) setShowNotifications(false);
                 }}
                 title={t('Menu', 'Menu')}
-                className={`w-9 h-9 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 border rounded-xl transition-colors shrink-0 cursor-pointer ${
-                  isToggleMenuOpen ? 'bg-slate-100 border-slate-300 text-slate-900' : 'border-slate-200/80'
+                className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors shrink-0 cursor-pointer border ${
+                  isToggleMenuOpen
+                    ? isStarryNight
+                      ? 'bg-blue-500/20 border-blue-400/40 text-blue-300'
+                      : 'bg-blue-50 border-blue-200 text-blue-700'
+                    : isStarryNight
+                    ? 'text-slate-300 hover:text-white hover:bg-white/10 border-white/10'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-slate-200/80'
                 }`}
               >
                 <Menu size={18} />
@@ -772,7 +839,11 @@ export const Header: React.FC<HeaderProps> = ({
                   />
                   <div
                     ref={toggleMenuContainerRef}
-                    className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto"
+                    className={`absolute right-0 top-full mt-2 w-72 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto ${
+                      isStarryNight
+                        ? 'bg-[#0b132b]/95 border border-white/15 text-slate-100 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)]'
+                        : 'bg-white border border-slate-200/90 text-slate-900 shadow-2xl'
+                    }`}
                   >
                     {renderToggleMenuItems()}
                   </div>
@@ -782,33 +853,48 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        
         {/* Dropdown Menu (Renders absolutely, shared between mobile/desktop trigger) */}
         {showNotifications && (
           <>
             <div
-              className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-[0.5px]"
+              className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-[1px]"
               onClick={() => setShowNotifications(false)}
             />
-            <div className="absolute right-3 sm:right-6 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto">
-              <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
-                <span className="font-bold text-xs uppercase tracking-wider text-slate-700">{t('realtimeStream', 'Real-time Stream')}</span>
+            <div className={`absolute right-3 sm:right-6 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100dvh-8rem)] overflow-y-auto ${
+              isStarryNight
+                ? 'bg-[#0b132b]/95 border border-white/15 text-slate-100 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)]'
+                : 'bg-white border border-slate-200/90 text-slate-900 shadow-2xl'
+            }`}>
+              <div className={`px-4 py-2 border-b flex items-center justify-between ${
+                isStarryNight ? 'border-white/10' : 'border-slate-100'
+              }`}>
+                <span className={`font-bold text-xs uppercase tracking-wider ${
+                  isStarryNight ? 'text-slate-300' : 'text-slate-700'
+                }`}>{t('realtimeStream', 'Real-time Stream')}</span>
                 <button
                   onClick={() => setShowNotifications(false)}
-                  className="text-slate-400 hover:text-slate-600"
+                  className={`p-1 rounded-lg transition-colors cursor-pointer ${
+                    isStarryNight ? 'text-slate-400 hover:text-white hover:bg-white/10' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                  }`}
                 >
                   <X size={14} />
                 </button>
               </div>
-              <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 text-xs">
+              <div className={`max-h-72 overflow-y-auto divide-y text-xs ${
+                isStarryNight ? 'divide-white/10' : 'divide-slate-100'
+              }`}>
                 {notifications.length === 0 ? (
-                  <div className="p-4 text-center text-slate-400">{t('noRecentAlerts', 'No recent alerts')}</div>
+                  <div className={`p-4 text-center ${isStarryNight ? 'text-slate-400' : 'text-slate-400'}`}>
+                    {t('noRecentAlerts', 'No recent alerts')}
+                  </div>
                 ) : (
                   notifications.map((n) => (
-                    <div key={n.id} className="p-3 hover:bg-slate-50 transition-colors">
-                      <div className="font-semibold text-slate-900">{n.title}</div>
-                      <div className="text-slate-600 mt-0.5">{n.body}</div>
-                      <div className="text-[10px] text-slate-400 mt-1">
+                    <div key={n.id} className={`p-3 transition-colors ${
+                      isStarryNight ? 'hover:bg-white/5' : 'hover:bg-slate-50'
+                    }`}>
+                      <div className={`font-semibold ${isStarryNight ? 'text-white' : 'text-slate-900'}`}>{n.title}</div>
+                      <div className={`mt-0.5 ${isStarryNight ? 'text-slate-300' : 'text-slate-600'}`}>{n.body}</div>
+                      <div className={`text-[10px] mt-1 ${isStarryNight ? 'text-slate-500' : 'text-slate-400'}`}>
                         {new Date(n.createdAt).toLocaleTimeString()}
                       </div>
                     </div>
@@ -821,11 +907,17 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Mobile Role Switcher Bar */}
-      <div className="md:hidden flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar px-2.5 sm:px-4 py-1.5 sm:py-2 bg-slate-50 border-t border-slate-200 text-[11px] sm:text-xs font-semibold scroll-smooth">
+      <div className={`md:hidden flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar px-2.5 sm:px-4 py-1.5 sm:py-2 border-t text-[11px] sm:text-xs font-semibold scroll-smooth transition-colors ${
+        isStarryNight ? 'bg-[#070d1e]/95 border-white/10' : 'bg-slate-50 border-slate-200'
+      }`}>
         <button
           onClick={() => onSelectRole('CUSTOMER')}
-          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
-            currentRole === 'CUSTOMER' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-200/60'
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
+            currentRole === 'CUSTOMER'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : isStarryNight
+              ? 'text-slate-300 hover:bg-white/10 hover:text-white'
+              : 'text-slate-700 hover:bg-slate-200/60'
           }`}
         >
           <User size={13} />
@@ -833,8 +925,12 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => onSelectRole('WORKER')}
-          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
-            currentRole === 'WORKER' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-200/60'
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
+            currentRole === 'WORKER'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : isStarryNight
+              ? 'text-slate-300 hover:bg-white/10 hover:text-white'
+              : 'text-slate-700 hover:bg-slate-200/60'
           }`}
         >
           <HardHat size={13} />
@@ -842,8 +938,12 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => onSelectRole('SOCIETY_ADMIN')}
-          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
-            currentRole === 'SOCIETY_ADMIN' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-200/60'
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
+            currentRole === 'SOCIETY_ADMIN'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : isStarryNight
+              ? 'text-slate-300 hover:bg-white/10 hover:text-white'
+              : 'text-slate-700 hover:bg-slate-200/60'
           }`}
         >
           <Building2 size={13} />
@@ -851,8 +951,12 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => onSelectRole('FEDERATION_ADMIN')}
-          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
-            currentRole === 'FEDERATION_ADMIN' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-200/60'
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
+            currentRole === 'FEDERATION_ADMIN'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : isStarryNight
+              ? 'text-slate-300 hover:bg-white/10 hover:text-white'
+              : 'text-slate-700 hover:bg-slate-200/60'
           }`}
         >
           <Sliders size={13} />
@@ -860,11 +964,15 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => onSelectRole('SUPER_ADMIN')}
-          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-bold ${
-            currentRole === 'SUPER_ADMIN' ? 'bg-amber-600 text-white shadow-xs' : 'text-amber-900 bg-amber-100 hover:bg-amber-200/80 border border-amber-300/60'
+          className={`shrink-0 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-bold cursor-pointer ${
+            currentRole === 'SUPER_ADMIN'
+              ? 'bg-amber-600 text-white shadow-xs'
+              : isStarryNight
+              ? 'text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30'
+              : 'text-amber-900 bg-amber-100 hover:bg-amber-200/80 border border-amber-300/60'
           }`}
         >
-          <Shield size={13} className={currentRole === 'SUPER_ADMIN' ? 'text-white' : 'text-amber-600'} />
+          <Shield size={13} className={currentRole === 'SUPER_ADMIN' ? 'text-white' : 'text-amber-400'} />
           <span>{t('Super_Admin_pagpx', `Super Admin`)}</span>
         </button>
       </div>

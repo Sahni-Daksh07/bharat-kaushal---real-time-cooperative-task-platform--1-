@@ -409,26 +409,83 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
               </div>
             </div>
 
+            {/* 1-Tap Demo Evaluation Profiles Quick-Fill Bar */}
+            <div className={`p-3 sm:p-3.5 rounded-2xl border space-y-2.5 transition-colors ${
+              isStarryNight ? 'bg-blue-950/25 border-blue-500/25 text-white' : 'bg-blue-50/70 border-blue-200/80 text-slate-800'
+            }`}>
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="flex items-center gap-1.5 text-blue-500">
+                  <Sparkles size={13} className="animate-pulse" />
+                  <span>1-Tap Demo Profiles (Instant Verification):</span>
+                </span>
+                <span className={`text-[10px] ${isStarryNight ? 'text-slate-400' : 'text-slate-500'}`}>Tap to fill & test</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {[
+                  { name: 'Priya Sharma', role: 'CUSTOMER' as UserRole, phone: '9826011111', pin: '1111', badge: 'Citizen' },
+                  { name: 'Ramesh Kumar', role: 'WORKER' as UserRole, phone: '9826022222', pin: '2222', badge: 'Artisan' },
+                  { name: 'Rekha Malviya', role: 'SOCIETY_ADMIN' as UserRole, phone: 'SOC-IND-048', pin: '4848', badge: 'Society' },
+                  { name: 'Dr. Anand Verma', role: 'FEDERATION_ADMIN' as UserRole, phone: 'FED-MP-001', pin: '9999', badge: 'Federation' },
+                  { name: 'Dr. A. Mohan IAS', role: 'SUPER_ADMIN' as UserRole, phone: 'REG-MP-999', pin: '8888', badge: 'Regulator' },
+                ].map((demo) => {
+                  const isSelected = selectedRole === demo.role && identifier === demo.phone;
+                  return (
+                    <button
+                      key={demo.phone}
+                      type="button"
+                      onClick={() => {
+                        setSelectedRole(demo.role);
+                        setIdentifier(demo.phone);
+                        setCredential(demo.pin);
+                        setAuthMethod('PASSWORD');
+                        setFeedback({
+                          type: 'success',
+                          message: `✓ Auto-filled credentials for ${demo.name} (${demo.badge})`,
+                        });
+                      }}
+                      className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                        isSelected
+                          ? isStarryNight
+                            ? 'bg-blue-600/40 border-blue-400 text-white shadow-sm ring-1 ring-blue-400/50'
+                            : 'bg-blue-100 border-blue-400 text-blue-900 shadow-xs ring-1 ring-blue-300'
+                          : isStarryNight
+                          ? 'bg-slate-900/60 border-white/10 text-slate-300 hover:bg-slate-800 hover:text-white'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="text-[11px] font-bold truncate">{demo.name}</div>
+                      <div className={`text-[10px] font-medium flex items-center justify-between mt-0.5 ${
+                        isSelected ? (isStarryNight ? 'text-blue-200' : 'text-blue-700') : (isStarryNight ? 'text-slate-400' : 'text-slate-500')
+                      }`}>
+                        <span>{demo.badge}</span>
+                        <span className="font-mono text-[9px] opacity-80">{demo.phone.slice(-4)}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Feedback Alert */}
             {feedback && (
               <div
-                className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${
+                className={`p-3 rounded-xl text-xs flex items-center gap-2 border animate-in fade-in duration-200 ${
                   feedback.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
-                    : 'bg-rose-50 text-rose-900 border-rose-300'
+                    ? isStarryNight ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40' : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+                    : isStarryNight ? 'bg-rose-950/40 text-rose-300 border-rose-500/40' : 'bg-rose-50 text-rose-900 border-rose-300'
                 }`}
               >
-                {feedback.type === 'success' ? <CheckCircle2 size={15} /> : <AlertCircle size={15} />}
-                <span>{feedback.message}</span>
+                {feedback.type === 'success' ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <AlertCircle size={16} className="text-rose-500 shrink-0" />}
+                <span className="font-medium">{feedback.message}</span>
               </div>
             )}
 
             {/* Form */}
             {activeTab === 'LOGIN' ? (
               <form onSubmit={handleLoginSubmit} className="space-y-4">
-                {/* Identifier Input (Clean blank initial state) */}
+                {/* Identifier Input (48px touch-friendly height & numeric inputMode) */}
                 <div>
-                  <label htmlFor="auth-identifier-input" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <label htmlFor="auth-identifier-input" className={`block text-xs font-bold mb-1.5 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>
                     {selectedRole === 'CUSTOMER' || selectedRole === 'WORKER'
                       ? 'Mobile Number or Registered ID'
                       : 'Official ID / Officer Code'}
@@ -436,7 +493,8 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                   <div className="relative">
                     <input
                       id="auth-identifier-input"
-                      type="text"
+                      type={selectedRole === 'CUSTOMER' || selectedRole === 'WORKER' ? 'tel' : 'text'}
+                      inputMode={selectedRole === 'CUSTOMER' || selectedRole === 'WORKER' ? 'numeric' : 'text'}
                       required
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
@@ -447,19 +505,19 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                           ? 'Enter mobile number or worker ID'
                           : 'Enter official registration code'
                       }
-                      className={`w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                      className={`w-full pl-3.5 pr-10 h-12 rounded-xl border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
                         isStarryNight
                           ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500 focus:border-blue-400'
                           : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
                       }`}
                     />
-                    <Mail size={15} className={`absolute right-3.5 top-3 pointer-events-none ${isStarryNight ? 'text-slate-500' : 'text-slate-400'}`} />
+                    <Mail size={16} className={`absolute right-3.5 top-3.5 pointer-events-none ${isStarryNight ? 'text-slate-500' : 'text-slate-400'}`} />
                   </div>
                 </div>
 
-                {/* Credential / Passcode / OTP Input (Clean blank initial state) */}
+                {/* Credential / Passcode / OTP Input */}
                 <div>
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <label htmlFor="auth-credential-input" className={`text-xs font-bold ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>
                       {authMethod === 'OTP' ? 'Security OTP' : 'PIN / Passcode'}
                     </label>
@@ -482,25 +540,26 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                     <input
                       id="auth-credential-input"
                       type={showPassword ? 'text' : 'password'}
+                      inputMode="numeric"
                       required
                       value={credential}
                       onChange={(e) => setCredential(e.target.value)}
                       placeholder={authMethod === 'OTP' ? 'Enter 4-digit code' : 'Enter security PIN'}
-                      className={`w-full pl-3.5 pr-20 py-2.5 rounded-xl border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono transition-colors ${
+                      className={`w-full pl-3.5 pr-24 h-12 rounded-xl border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-widest transition-colors ${
                         isStarryNight
                           ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500 focus:border-blue-400'
                           : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
                       }`}
                     />
-                    <div className="absolute right-2 top-2 flex items-center gap-1">
+                    <div className="absolute right-2 top-2 bottom-2 flex items-center gap-1">
                       {authMethod === 'OTP' && (
                         <button
                           type="button"
                           onClick={handleSendOtp}
-                          className={`px-2 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                          className={`h-8 px-2.5 rounded-lg text-[11px] font-bold cursor-pointer transition-colors flex items-center ${
                             isStarryNight
-                              ? 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30'
-                              : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                              ? 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border border-blue-500/30'
+                              : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
                           }`}
                         >
                           {otpSent ? 'Resend' : 'Get OTP'}
@@ -510,11 +569,11 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={showPassword ? 'Hide passcode' : 'Show passcode'}
-                        className={`p-1 cursor-pointer transition-colors ${
-                          isStarryNight ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'
+                        className={`h-8 w-8 flex items-center justify-center rounded-lg cursor-pointer transition-colors ${
+                          isStarryNight ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
                         }`}
                       >
-                        {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                       </button>
                     </div>
                   </div>
@@ -554,60 +613,62 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleRegisterSubmit} className="space-y-3">
+              <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
                 <div>
-                  <label htmlFor="reg-name" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Full Name</label>
+                  <label htmlFor="reg-name" className={`block text-xs font-bold mb-1.5 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Full Name</label>
                   <input
                     id="reg-name"
                     type="text"
                     required
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
-                    placeholder="Enter your name"
-                    className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 ${
+                    placeholder="Enter citizen name"
+                    className={`w-full px-3.5 h-12 rounded-xl border text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors ${
                       isStarryNight ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500' : 'bg-white border-slate-300 text-slate-900'
                     }`}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="reg-phone" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Mobile Number</label>
+                  <label htmlFor="reg-phone" className={`block text-xs font-bold mb-1.5 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Mobile Number</label>
                   <input
                     id="reg-phone"
                     type="tel"
+                    inputMode="numeric"
                     required
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
                     placeholder="10-digit mobile number"
-                    className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-3.5 h-12 rounded-xl border text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors ${
                       isStarryNight ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500' : 'bg-white border-slate-300 text-slate-900'
                     }`}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="reg-email" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Email (Optional)</label>
+                  <label htmlFor="reg-email" className={`block text-xs font-bold mb-1.5 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Email (Optional)</label>
                   <input
                     id="reg-email"
                     type="email"
+                    inputMode="email"
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-3.5 h-12 rounded-xl border text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors ${
                       isStarryNight ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500' : 'bg-white border-slate-300 text-slate-900'
                     }`}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="reg-address" className={`block text-xs font-bold mb-1 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Locality (Indore)</label>
+                  <label htmlFor="reg-address" className={`block text-xs font-bold mb-1.5 ${isStarryNight ? 'text-slate-300' : 'text-slate-700'}`}>Locality (Indore)</label>
                   <input
                     id="reg-address"
                     type="text"
                     value={regAddress}
                     onChange={(e) => setRegAddress(e.target.value)}
                     placeholder="e.g. Vijay Nagar, Palasia, Rajwada"
-                    className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-3.5 h-12 rounded-xl border text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors ${
                       isStarryNight ? 'bg-slate-900/90 border-white/15 text-white placeholder:text-slate-500' : 'bg-white border-slate-300 text-slate-900'
                     }`}
                   />
@@ -616,7 +677,7 @@ export const UnifiedAuthExperience: React.FC<UnifiedAuthExperienceProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full h-11 rounded-xl text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer mt-2 ${
+                  className={`w-full h-12 rounded-xl text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer mt-3 ${
                     isStarryNight ? 'starry-btn-glossy' : 'bg-blue-600 hover:bg-blue-700'
                   }`}
                 >

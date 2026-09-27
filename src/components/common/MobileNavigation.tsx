@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UserRole } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { SupportedLanguage, SUPPORTED_LANGUAGES, getTranslation } from '../../utils/i18n';
 import {
   Home,
@@ -64,6 +65,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     logoutSuperAdmin,
     openAuthModal,
   } = useAuth();
+  const { isStarryNight } = useTheme();
 
   const { bookings } = useRealtime();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -142,83 +144,85 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     (b) => b.status === 'ACCEPTED' || b.status === 'TRAVELLING' || b.status === 'IN_PROGRESS' || b.status === 'WORKER_DISPATCHED'
   );
 
+  const activeTabClass = isStarryNight ? 'text-blue-400 font-extrabold' : 'text-blue-600 font-bold';
+  const inactiveTabClass = isStarryNight ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800';
+  const activeDotClass = isStarryNight ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]' : 'bg-blue-600';
+
   return (
     <>
       {/* Persistent Native Mobile App Bottom Navigation Bar (< 640px) */}
       <nav
         aria-label="Mobile Navigation Dock"
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-2xl border-t border-slate-200/90 px-3 py-1.5 flex items-center justify-around shadow-[0_-6px_25px_rgba(15,23,42,0.08)] select-none"
+        className={`sm:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-2xl border-t px-3 py-1.5 flex items-center justify-around select-none transition-colors duration-300 pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)] ${
+          isStarryNight
+            ? 'bg-[#060c20]/94 border-white/10 text-slate-400 shadow-[0_-8px_32px_rgba(0,0,0,0.7)]'
+            : 'bg-white/95 border-slate-200/90 text-slate-600 shadow-[0_-6px_25px_rgba(15,23,42,0.08)]'
+        }`}
       >
         {currentRole === 'WORKER' ? (
           <>
             <button
               onClick={() => handleTabClick('DASHBOARD', 'OPEN_WORKER_DASHBOARD')}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
-                activeMobileTab === 'DASHBOARD'
-                  ? 'text-blue-600'
-                  : 'text-slate-500 hover:text-slate-800'
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${
+                activeMobileTab === 'DASHBOARD' ? activeTabClass : inactiveTabClass
               }`}
             >
               <Home size={19} strokeWidth={activeMobileTab === 'DASHBOARD' ? 2.5 : 2} />
               <span>Home</span>
               {activeMobileTab === 'DASHBOARD' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+                <span className={`w-1.5 h-1.5 rounded-full mt-0.5 animate-in fade-in ${activeDotClass}`} />
               )}
             </button>
 
             <button
               onClick={() => handleTabClick('FIND_WORK', 'OPEN_FIND_WORK')}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
-                activeMobileTab === 'FIND_WORK'
-                  ? 'text-blue-600'
-                  : 'text-slate-500 hover:text-slate-800'
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${
+                activeMobileTab === 'FIND_WORK' ? activeTabClass : inactiveTabClass
               }`}
             >
               <Search size={19} strokeWidth={activeMobileTab === 'FIND_WORK' ? 2.5 : 2} />
               <span>Find Work</span>
               {activeMobileTab === 'FIND_WORK' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+                <span className={`w-1.5 h-1.5 rounded-full mt-0.5 animate-in fade-in ${activeDotClass}`} />
               )}
             </button>
 
             <button
               onClick={() => handleTabClick('ORDER_CARD', 'OPEN_ORDER_CARD')}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all relative ${
-                activeMobileTab === 'ORDER_CARD'
-                  ? 'text-blue-600'
-                  : 'text-slate-500 hover:text-slate-800'
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all relative cursor-pointer ${
+                activeMobileTab === 'ORDER_CARD' ? activeTabClass : inactiveTabClass
               }`}
             >
               <div className="relative">
                 <Briefcase size={19} strokeWidth={activeMobileTab === 'ORDER_CARD' ? 2.5 : 2} />
                 {hasPendingOrders && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white animate-pulse" />
+                  <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse border-2 ${
+                    isStarryNight ? 'border-slate-900' : 'border-white'
+                  }`} />
                 )}
               </div>
               <span>Jobs</span>
               {activeMobileTab === 'ORDER_CARD' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+                <span className={`w-1.5 h-1.5 rounded-full mt-0.5 animate-in fade-in ${activeDotClass}`} />
               )}
             </button>
 
             <button
               onClick={() => handleTabClick('INCOME_HISTORY', 'OPEN_INCOME_HISTORY')}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
-                activeMobileTab === 'INCOME_HISTORY'
-                  ? 'text-blue-600'
-                  : 'text-slate-500 hover:text-slate-800'
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${
+                activeMobileTab === 'INCOME_HISTORY' ? activeTabClass : inactiveTabClass
               }`}
             >
               <Wallet size={19} strokeWidth={activeMobileTab === 'INCOME_HISTORY' ? 2.5 : 2} />
               <span>Earnings</span>
               {activeMobileTab === 'INCOME_HISTORY' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+                <span className={`w-1.5 h-1.5 rounded-full mt-0.5 animate-in fade-in ${activeDotClass}`} />
               )}
             </button>
 
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 active:scale-95 transition-all"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${inactiveTabClass}`}
             >
               <User size={19} />
               <span>Profile</span>
@@ -228,51 +232,47 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
           <>
             <button
               onClick={() => handleTabClick('SERVICES', 'OPEN_CUSTOMER_SERVICES')}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
-                activeMobileTab === 'SERVICES'
-                  ? 'text-blue-600'
-                  : 'text-slate-500 hover:text-slate-800'
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${
+                activeMobileTab === 'SERVICES' ? activeTabClass : inactiveTabClass
               }`}
             >
               <Home size={19} strokeWidth={activeMobileTab === 'SERVICES' ? 2.5 : 2} />
               <span>Services</span>
               {activeMobileTab === 'SERVICES' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+                <span className={`w-1.5 h-1.5 rounded-full mt-0.5 animate-in fade-in ${activeDotClass}`} />
               )}
             </button>
 
             <button
               onClick={() => handleTabClick('HISTORY', 'OPEN_CUSTOMER_HISTORY')}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all relative ${
-                activeMobileTab === 'HISTORY'
-                  ? 'text-blue-600'
-                  : 'text-slate-500 hover:text-slate-800'
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all relative cursor-pointer ${
+                activeMobileTab === 'HISTORY' ? activeTabClass : inactiveTabClass
               }`}
             >
               <div className="relative">
                 <Calendar size={19} strokeWidth={activeMobileTab === 'HISTORY' ? 2.5 : 2} />
                 {hasPendingOrders && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
+                  <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse border-2 ${
+                    isStarryNight ? 'border-slate-900' : 'border-white'
+                  }`} />
                 )}
               </div>
               <span>Bookings</span>
               {activeMobileTab === 'HISTORY' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+                <span className={`w-1.5 h-1.5 rounded-full mt-0.5 animate-in fade-in ${activeDotClass}`} />
               )}
             </button>
 
             <button
               onClick={() => handleTabClick('MAP', 'OPEN_CUSTOMER_MAP')}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold active:scale-95 transition-all ${
-                activeMobileTab === 'MAP'
-                  ? 'text-blue-600'
-                  : 'text-slate-500 hover:text-slate-800'
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${
+                activeMobileTab === 'MAP' ? activeTabClass : inactiveTabClass
               }`}
             >
               <MapPin size={19} strokeWidth={activeMobileTab === 'MAP' ? 2.5 : 2} />
               <span>Live Map</span>
               {activeMobileTab === 'MAP' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5 animate-in fade-in" />
+                <span className={`w-1.5 h-1.5 rounded-full mt-0.5 animate-in fade-in ${activeDotClass}`} />
               )}
             </button>
 
@@ -280,7 +280,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
               onClick={() => {
                 document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
               }}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 active:scale-95 transition-all"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${inactiveTabClass}`}
             >
               <LifeBuoy size={19} />
               <span>Help</span>
@@ -288,7 +288,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 active:scale-95 transition-all"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${inactiveTabClass}`}
             >
               <User size={19} />
               <span>Profile</span>
@@ -299,7 +299,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
           <>
             <button
               onClick={() => handleTabClick('OVERVIEW')}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-blue-600 active:scale-95 transition-all"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${activeTabClass}`}
             >
               <Home size={19} strokeWidth={2.5} />
               <span>Command</span>
@@ -307,7 +307,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
             <button
               onClick={() => openAuthModal(currentRole)}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 active:scale-95 transition-all"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${inactiveTabClass}`}
             >
               <Shield size={19} />
               <span>Clearance</span>
@@ -315,7 +315,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] font-bold text-slate-500 active:scale-95 transition-all"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl text-[10px] active:scale-95 transition-all cursor-pointer ${inactiveTabClass}`}
             >
               <Menu size={19} />
               <span>Menu</span>
@@ -324,37 +324,51 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         )}
       </nav>
 
-      {/* Slide-over Mobile Navigation Drawer (Mockup #1 Screen 11) */}
+      {/* Slide-over Mobile Navigation Drawer */}
       {isDrawerOpen && (
         <>
           <div
-            className="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[2px] transition-opacity animate-in fade-in duration-200"
             onClick={() => setIsDrawerOpen(false)}
           />
 
-          <div className="fixed inset-y-0 right-0 z-50 w-80 max-w-[85vw] bg-white shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-200">
+          <div className={`fixed inset-y-0 right-0 z-50 w-80 max-w-[85vw] shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-200 border-l ${
+            isStarryNight
+              ? 'bg-[#081026] text-white border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.9)]'
+              : 'bg-white text-slate-800 border-slate-200 shadow-2xl'
+          }`}>
             {/* Drawer Header & Profile */}
-            <div className="p-5 border-b border-slate-100 space-y-4">
+            <div className={`p-5 border-b space-y-4 ${isStarryNight ? 'border-white/10' : 'border-slate-100'}`}>
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs uppercase tracking-wider text-slate-400">Navigation Menu</span>
+                <span className={`font-bold text-xs uppercase tracking-wider ${isStarryNight ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Navigation Menu
+                </span>
                 <button
                   onClick={() => setIsDrawerOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center"
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                    isStarryNight ? 'bg-white/10 hover:bg-white/20 text-slate-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                  }`}
                 >
                   <X size={16} />
                 </button>
               </div>
 
               {/* User Identity Card */}
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+              <div className={`flex items-center gap-3 p-3 rounded-2xl border transition-colors ${
+                isStarryNight ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+              }`}>
                 <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-700 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
                   {user.avatarInitials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-sm text-slate-900 truncate">{user.name}</div>
-                  <div className="text-[11px] text-slate-500 truncate">{user.roleTitle}</div>
+                  <div className={`font-bold text-sm truncate ${isStarryNight ? 'text-white' : 'text-slate-900'}`}>{user.name}</div>
+                  <div className={`text-[11px] truncate ${isStarryNight ? 'text-slate-400' : 'text-slate-500'}`}>{user.roleTitle}</div>
                   {user.trustScore && (
-                    <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded mt-1">
+                    <div className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.2 rounded mt-1 border ${
+                      isStarryNight
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    }`}>
                       Trust: {user.trustScore}/100
                     </div>
                   )}
@@ -363,15 +377,19 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </div>
 
             {/* Navigation Links */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-1 text-xs font-semibold text-slate-700">
+            <div className={`flex-1 overflow-y-auto p-4 space-y-1 text-xs font-semibold ${
+              isStarryNight ? 'text-slate-200' : 'text-slate-700'
+            }`}>
               <button
                 onClick={() => {
                   setIsDrawerOpen(false);
                   onSelectTab?.(currentRole === 'WORKER' ? 'DASHBOARD' : 'SERVICES');
                 }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                  isStarryNight ? 'hover:bg-white/10 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
+                }`}
               >
-                <Home size={16} className="text-slate-500" />
+                <Home size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
                 <span>Home Dashboard</span>
               </button>
 
@@ -382,9 +400,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       setIsDrawerOpen(false);
                       onSelectTab?.('FIND_WORK');
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                      isStarryNight ? 'hover:bg-white/10 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
+                    }`}
                   >
-                    <Search size={16} className="text-slate-500" />
+                    <Search size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
                     <span>Find Work Marketplace</span>
                   </button>
 
@@ -393,9 +413,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       setIsDrawerOpen(false);
                       onSelectTab?.('ORDER_CARD');
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                      isStarryNight ? 'hover:bg-white/10 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
+                    }`}
                   >
-                    <Briefcase size={16} className="text-slate-500" />
+                    <Briefcase size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
                     <span>My Jobs & Orders</span>
                   </button>
 
@@ -404,9 +426,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       setIsDrawerOpen(false);
                       onSelectTab?.('INCOME_HISTORY');
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                      isStarryNight ? 'hover:bg-white/10 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
+                    }`}
                   >
-                    <Wallet size={16} className="text-slate-500" />
+                    <Wallet size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
                     <span>Earnings & Welfare</span>
                   </button>
                 </>
@@ -419,9 +443,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       setIsDrawerOpen(false);
                       onSelectTab?.('SERVICES');
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                      isStarryNight ? 'hover:bg-white/10 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
+                    }`}
                   >
-                    <Search size={16} className="text-slate-500" />
+                    <Search size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
                     <span>Book a Service</span>
                   </button>
 
@@ -430,9 +456,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       setIsDrawerOpen(false);
                       onSelectTab?.('HISTORY');
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                      isStarryNight ? 'hover:bg-white/10 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
+                    }`}
                   >
-                    <FileText size={16} className="text-slate-500" />
+                    <FileText size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
                     <span>Booking History & Invoices</span>
                   </button>
                 </>
@@ -443,17 +471,21 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   setIsDrawerOpen(false);
                   document.dispatchEvent(new CustomEvent('OPEN_PROFILE'));
                 }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                  isStarryNight ? 'hover:bg-white/10 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
+                }`}
               >
-                <User size={16} className="text-slate-500" />
+                <User size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
                 <span>My Profile & Settings</span>
               </button>
 
-              <div className="h-px bg-slate-100 my-2"></div>
+              <div className={`h-px my-2 ${isStarryNight ? 'bg-white/10' : 'bg-slate-100'}`}></div>
 
               {/* Role Switcher in Drawer */}
               <div className="px-3 pt-1 pb-2">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                <div className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${
+                  isStarryNight ? 'text-slate-400' : 'text-slate-500'
+                }`}>
                   Switch Active Role
                 </div>
                 <div className="grid grid-cols-2 gap-1.5 text-[11px]">
@@ -462,8 +494,12 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       onSelectRole('CUSTOMER');
                       setIsDrawerOpen(false);
                     }}
-                    className={`p-2 rounded-lg border text-left font-medium ${
-                      currentRole === 'CUSTOMER' ? 'bg-blue-50 border-blue-300 text-blue-800' : 'border-slate-200'
+                    className={`p-2 rounded-lg border text-left font-medium cursor-pointer transition-all ${
+                      currentRole === 'CUSTOMER'
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-xs'
+                        : isStarryNight
+                        ? 'border-white/10 text-slate-300 bg-white/5 hover:bg-white/10'
+                        : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                     }`}
                   >
                     Citizen Customer
@@ -473,8 +509,12 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       onSelectRole('WORKER');
                       setIsDrawerOpen(false);
                     }}
-                    className={`p-2 rounded-lg border text-left font-medium ${
-                      currentRole === 'WORKER' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'border-slate-200'
+                    className={`p-2 rounded-lg border text-left font-medium cursor-pointer transition-all ${
+                      currentRole === 'WORKER'
+                        ? 'bg-amber-600 text-white border-amber-500 shadow-xs'
+                        : isStarryNight
+                        ? 'border-white/10 text-slate-300 bg-white/5 hover:bg-white/10'
+                        : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                     }`}
                   >
                     Coop Worker
@@ -484,8 +524,12 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       onSelectRole('SOCIETY_ADMIN');
                       setIsDrawerOpen(false);
                     }}
-                    className={`p-2 rounded-lg border text-left font-medium ${
-                      currentRole === 'SOCIETY_ADMIN' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'border-slate-200'
+                    className={`p-2 rounded-lg border text-left font-medium cursor-pointer transition-all ${
+                      currentRole === 'SOCIETY_ADMIN'
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-xs'
+                        : isStarryNight
+                        ? 'border-white/10 text-slate-300 bg-white/5 hover:bg-white/10'
+                        : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                     }`}
                   >
                     Society Admin
@@ -495,8 +539,12 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       onSelectRole('SUPER_ADMIN');
                       setIsDrawerOpen(false);
                     }}
-                    className={`p-2 rounded-lg border text-left font-medium ${
-                      currentRole === 'SUPER_ADMIN' ? 'bg-purple-50 border-purple-300 text-purple-800' : 'border-slate-200'
+                    className={`p-2 rounded-lg border text-left font-medium cursor-pointer transition-all ${
+                      currentRole === 'SUPER_ADMIN'
+                        ? 'bg-purple-600 text-white border-purple-500 shadow-xs'
+                        : isStarryNight
+                        ? 'border-white/10 text-slate-300 bg-white/5 hover:bg-white/10'
+                        : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                     }`}
                   >
                     Super Admin
@@ -504,13 +552,15 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 </div>
               </div>
 
-              <div className="h-px bg-slate-100 my-2"></div>
+              <div className={`h-px my-2 ${isStarryNight ? 'bg-white/10' : 'bg-slate-100'}`}></div>
 
               {/* Language Selector */}
               {onSelectLang && (
-                <div className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="flex items-center gap-3 text-slate-700">
-                    <Globe size={16} className="text-blue-600" />
+                <div className={`flex items-center justify-between px-3 py-2 rounded-xl transition-colors ${
+                  isStarryNight ? 'hover:bg-white/5' : 'hover:bg-slate-50'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <Globe size={16} className="text-blue-500" />
                     <span className="font-medium text-xs">Language</span>
                   </div>
                   <div className="relative">
@@ -518,10 +568,14 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       aria-label="Change Language"
                       value={lang}
                       onChange={(e) => onSelectLang(e.target.value as SupportedLanguage)}
-                      className="h-8 pl-2.5 pr-6 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none"
+                      className={`h-8 pl-2.5 pr-6 text-xs font-semibold rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none border ${
+                        isStarryNight
+                          ? 'bg-slate-800 text-slate-200 border-white/15'
+                          : 'bg-slate-100 text-slate-700 border-slate-200'
+                      }`}
                     >
                       {SUPPORTED_LANGUAGES.map((l) => (
-                        <option key={l.code} value={l.code}>
+                        <option key={l.code} value={l.code} className={isStarryNight ? 'bg-slate-900 text-white' : ''}>
                           {l.nativeName}
                         </option>
                       ))}
@@ -536,15 +590,17 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   setIsDrawerOpen(false);
                   document.dispatchEvent(new CustomEvent('OPEN_SUPPORT'));
                 }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                  isStarryNight ? 'hover:bg-white/10 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
+                }`}
               >
-                <LifeBuoy size={16} className="text-slate-500" />
+                <LifeBuoy size={16} className={isStarryNight ? 'text-slate-400' : 'text-slate-500'} />
                 <span>Help & Helpline (1915)</span>
               </button>
 
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
               >
                 <LogOut size={16} />
                 <span>Logout Session</span>
@@ -552,8 +608,12 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </div>
 
             {/* Bottom Tagline & Tricolor Ribbon */}
-            <div className="p-4 bg-slate-50 border-t border-slate-100 text-center space-y-2">
-              <div className="text-[10px] text-slate-500">Skills for a Stronger India</div>
+            <div className={`p-4 border-t text-center space-y-2 ${
+              isStarryNight ? 'bg-[#050b1d] border-white/10' : 'bg-slate-50 border-slate-100'
+            }`}>
+              <div className={`text-[10px] ${isStarryNight ? 'text-slate-400' : 'text-slate-500'}`}>
+                Skills for a Stronger India • MP Act, 1960
+              </div>
               <div className="h-1 rounded-full bg-gradient-to-r from-amber-500 via-slate-300 to-emerald-500 mx-auto w-24"></div>
             </div>
           </div>
@@ -562,3 +622,4 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     </>
   );
 };
+

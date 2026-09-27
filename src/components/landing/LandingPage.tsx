@@ -86,8 +86,46 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   // Interactive 5-Role Dashboard Preview Tab
   const [activeDashboardTab, setActiveDashboardTab] = useState<UserRole>('CUSTOMER');
 
-  // Interactive Sticky Scrolling Step State
+  // Interactive Sticky Scrolling Step State (ui-layouts.com/components/sticky-scroll)
   const [activeStickyStep, setActiveStickyStep] = useState<number>(1);
+  const stickyScrollContainerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: stickyScrollProgress } = useScroll({
+    target: stickyScrollContainerRef,
+    offset: ['start 15%', 'end 85%'],
+  });
+
+  useMotionValueEvent(stickyScrollProgress, 'change', (latest) => {
+    const breakpoints = [0, 0.25, 0.5, 0.75];
+    const closestIndex = breakpoints.reduce((acc, bp, index) => {
+      return Math.abs(latest - bp) < Math.abs(latest - breakpoints[acc]) ? index : acc;
+    }, 0);
+    setActiveStickyStep(closestIndex + 1);
+  });
+
+  useEffect(() => {
+    const handleScrollMilestones = () => {
+      const container = stickyScrollContainerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      if (rect.top > window.innerHeight || rect.bottom < 0) return;
+
+      const milestones = [1, 2, 3, 4].map((step) => {
+        const el = document.getElementById(`sticky-step-${step}`);
+        if (!el) return { step, distance: Infinity };
+        const elRect = el.getBoundingClientRect();
+        const distance = Math.abs(elRect.top + elRect.height / 2 - window.innerHeight / 2);
+        return { step, distance };
+      });
+
+      milestones.sort((a, b) => a.distance - b.distance);
+      if (milestones[0] && milestones[0].distance !== Infinity) {
+        setActiveStickyStep(milestones[0].step);
+      }
+    };
+
+    window.addEventListener('scroll', handleScrollMilestones, { passive: true });
+    return () => window.removeEventListener('scroll', handleScrollMilestones);
+  }, []);
 
   // Photographic & Video Showcase State in Section 7
   const [activeShowcaseImage, setActiveShowcaseImage] = useState<number>(0);
@@ -2983,322 +3021,451 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </motion.div>
 
-          {/* Sticky Scrolling Split Workflow (Left Pinned Column + Right Scrolling Cards) */}
-          <div className="lg:grid lg:grid-cols-12 lg:gap-10 items-start">
-            {/* Left Pinned Column (Desktop lg+) */}
-            <div className="hidden lg:block lg:col-span-5 sticky top-28 self-start space-y-5">
-              <div className={`rounded-3xl p-6 border space-y-6 ${
-                isStarryNight ? 'starry-card' : 'bg-white border-slate-200 shadow-md'
+          {/* UI-Layouts Authentic Sticky Scroll Workflow (ui-layouts.com/components/sticky-scroll) */}
+          <div ref={stickyScrollContainerRef} className="relative mt-12 sm:mt-16">
+            {/* Mobile Sticky Step Tracker (Visible on Screens < lg, pins to top-16) */}
+            <div className="lg:hidden sticky top-16 z-30 mb-8 -mx-1 px-1">
+              <div className={`p-4 rounded-2xl border backdrop-blur-2xl shadow-xl flex flex-col gap-2.5 transition-colors ${
+                isStarryNight ? 'bg-[#070d1e]/95 border-blue-500/30 text-white shadow-[0_4px_30px_rgba(59,130,246,0.2)]' : 'bg-white/95 border-blue-200 text-slate-900 shadow-md'
               }`}>
-                <div className="space-y-2">
-                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold ${
-                    isStarryNight ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-blue-50 text-blue-700'
-                  }`}>
-                    <Compass size={13} />
-                    <span>Civic Lifecycle Navigation</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-6 h-6 rounded-lg bg-blue-600 text-white text-[11px] font-bold flex items-center justify-center shadow-xs">
+                      0{activeStickyStep}
+                    </span>
+                    <span className="text-xs font-bold truncate max-w-[200px]">
+                      {activeStickyStep === 1 && 'Stage 1 • Verification & e-KYC'}
+                      {activeStickyStep === 2 && 'Stage 2 • Public Tariffs & Match'}
+                      {activeStickyStep === 3 && 'Stage 3 • Doorstep Arrival OTP'}
+                      {activeStickyStep === 4 && 'Stage 4 • Instant Settlement'}
+                    </span>
                   </div>
-                  <h3 className={`text-xl font-extrabold tracking-tight ${isStarryNight ? 'text-white' : 'text-slate-900'}`}>
-                    Step 0{activeStickyStep} of 04
-                  </h3>
-                  <p className={`text-xs leading-relaxed ${isStarryNight ? 'text-slate-300' : 'text-slate-600'}`}>
-                    Scroll through each milestone to witness how public digital trust protects both citizens and artisans.
-                  </p>
-                </div>
-
-                {/* Interactive Milestone Indicator List */}
-                <div className="space-y-2.5">
-                  {[
-                    { step: 1, label: 'Artisan Verification & e-KYC', code: 'Aadhaar e-KYC' },
-                    { step: 2, label: 'Transparent Selection & Match', code: '146 Public Rates' },
-                    { step: 3, label: 'Doorstep Arrival OTP', code: '4-Digit Code' },
-                    { step: 4, label: 'Fair Split Settlement', code: '94.5% Direct UPI' },
-                  ].map((m) => {
-                    const isCurrent = activeStickyStep === m.step;
-                    return (
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {[1, 2, 3, 4].map((s) => (
                       <button
-                        key={m.step}
-                        onClick={() => setActiveStickyStep(m.step)}
-                        className={`w-full text-left p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
-                          isCurrent
-                            ? isStarryNight
-                              ? 'bg-blue-600/30 border-blue-400 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]'
-                              : 'bg-blue-50 border-blue-300 text-blue-900 shadow-sm'
-                            : isStarryNight
-                            ? 'bg-slate-900/40 border-white/5 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
-                            : 'bg-slate-50 border-slate-200/60 text-slate-600 hover:bg-slate-100'
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          setActiveStickyStep(s);
+                          const el = document.getElementById(`sticky-step-${s}`);
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        className={`h-2 rounded-full transition-all cursor-pointer ${
+                          activeStickyStep === s ? 'bg-blue-500 w-5' : isStarryNight ? 'bg-slate-700 w-2 hover:bg-slate-600' : 'bg-slate-300 w-2 hover:bg-slate-400'
                         }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center ${
+                        aria-label={`Jump to stage ${s}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {/* Thin Animated Mobile Scroll Progress Bar */}
+                <div className={`w-full h-1 rounded-full overflow-hidden ${isStarryNight ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 via-amber-500 to-emerald-500 transition-all duration-300"
+                    style={{ width: `${(activeStickyStep / 4) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Split Sticky-Scroll Container */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12 items-start">
+              {/* Left Column: 4 Milestone Story Sections Scrolling Vertically */}
+              <div className="lg:col-span-6 space-y-16 lg:space-y-24">
+                {[
+                  {
+                    step: 1,
+                    badgeText: 'Stage 1 • Democratic e-KYC',
+                    code: 'Aadhaar e-KYC',
+                    color: 'from-blue-600 to-indigo-600',
+                    badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+                    image: '/images/cooperative_community.jpg',
+                    imgCaption: 'Indore Ward 48 Society Registration & Democratic e-KYC',
+                    title: 'Artisan Verification & Democratic e-KYC',
+                    desc: 'Skilled tradesmen register with their local cooperative society in Indore. Identity is verified using Aadhaar e-KYC with masked identity numbers for citizen privacy, accompanied by a rigorous physical trade competency assessment by elected ward elders.',
+                    bullets: [
+                      'Masked UIDAI validation — Zero citizen identity leakage or surveillance storage',
+                      'Physical trade evaluation certified by Ward 48 Society inspection officers',
+                      'Zero registration bidding or algorithmic lead fees for verified artisans',
+                    ],
+                    highlight: 'Verification SLA: < 48 hours across Indore pilot wards',
+                    simulation: {
+                      title: 'UIDAI Masked ID Simulation',
+                      status: 'Identity Authenticated & Society Certified',
+                      statusColor: 'text-emerald-400',
+                      detail: 'Aadhaar: •••• •••• 9821 • Ward 48 Society Certified • Grade: Master Electrician',
+                    },
+                  },
+                  {
+                    step: 2,
+                    badgeText: 'Stage 2 • Public Tariffs',
+                    code: '146 Public Rates',
+                    color: 'from-amber-500 to-orange-500',
+                    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                    image: '/images/cooperative_command.jpg',
+                    imgCaption: 'Municipal Command Center & Proximity Dispatch Screen',
+                    title: 'Transparent Selection & Proximity Match',
+                    desc: 'Residents select from 146 benchmarked services at pre-published public rates under the MP Cooperative Societies Act. The platform matches the nearest certified artisan within a 5 km radius in Indore with guaranteed transparent pricing.',
+                    bullets: [
+                      '146 Standardized municipal rate tariffs with zero dynamic surge pricing',
+                      'Hyper-local dispatch within 5 km across Vijay Nagar, Palasia & Rajwada',
+                      'Transparent upfront quotation with zero hidden cooperative commission markups',
+                    ],
+                    highlight: 'Average Proximity Arrival: 18–35 mins across Indore',
+                    simulation: {
+                      title: 'Municipal Rate Benchmark Radar',
+                      status: 'Proximity Dispatch: 5 km Radius Active',
+                      statusColor: 'text-amber-400',
+                      detail: 'Fixed Tariff: ₹249 vs Commercial App: ₹499 + surge • Dispatch Radius: 5 km',
+                    },
+                  },
+                  {
+                    step: 3,
+                    badgeText: 'Stage 3 • Doorstep Security',
+                    code: '4-Digit Code',
+                    color: 'from-purple-600 to-pink-600',
+                    badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+                    image: '/images/doorstep_verified_visit.jpg',
+                    imgCaption: 'Resident 4-Digit Doorstep OTP Verification in Indore',
+                    title: 'Doorstep Arrival OTP & Parts Agreement',
+                    desc: 'The artisan arrives on schedule. A 4-digit Arrival OTP shared by the resident confirms the worker\'s identity before work begins. Any needed replacement materials are agreed upfront at actual receipt cost without marked-up parts.',
+                    bullets: [
+                      '4-digit arrival passcode prevents impersonation or unverified doorstep entry',
+                      'Replacement parts billed at actual retail receipt with zero cooperative markup',
+                      'Explicit resident mobile confirmation required for any scope extensions',
+                    ],
+                    highlight: 'Security Level: 2-Factor resident OTP verification',
+                    simulation: {
+                      title: 'Doorstep Arrival Security OTP',
+                      status: 'Passcode Verified • Authorized Entry Confirmed',
+                      statusColor: 'text-purple-400',
+                      detail: 'Security Passcode: [ 4 ] [ 8 ] [ 1 ] [ 9 ] • Resident Authorization Verified',
+                    },
+                  },
+                  {
+                    step: 4,
+                    badgeText: 'Stage 4 • Instant Settlement',
+                    code: '94.5% Direct UPI',
+                    color: 'from-emerald-600 to-teal-600',
+                    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+                    image: '/images/hero_artisan.jpg',
+                    imgCaption: 'Certified Member Artisan Receiving 94.5% Instant Credit',
+                    title: 'Fair Split Settlement & Social Welfare',
+                    desc: 'Upon job completion confirmation, payment settles instantly: 94.5% straight to the artisan\'s linked bank account via UPI, 3.5% to cooperative administration, and 2.0% to the MP unorganized worker welfare fund.',
+                    bullets: [
+                      '94.5% direct labor payout credited directly to artisan via instant UPI',
+                      '2.0% accrues automatically in MP unorganized worker health & accident fund',
+                      '3.5% maintains municipal digital infrastructure, dispute resolution & audits',
+                    ],
+                    highlight: 'Settlement Speed: Instant UPI upon OTP validation',
+                    simulation: {
+                      title: 'Direct Split Payout Ledger',
+                      status: 'Direct UPI Settled • Zero Middleman Cut',
+                      statusColor: 'text-emerald-400',
+                      detail: '₹945.00 Artisan (94.5%) • ₹20.00 Welfare Fund (2.0%) • ₹35.00 Samiti (3.5%)',
+                    },
+                  },
+                ].map((item) => {
+                  const isCurrent = activeStickyStep === item.step;
+                  return (
+                    <div
+                      key={item.step}
+                      id={`sticky-step-${item.step}`}
+                      className={`min-h-[48vh] sm:min-h-[55vh] flex flex-col justify-center rounded-3xl p-6 sm:p-8 border transition-all duration-500 ${
+                        isCurrent
+                          ? isStarryNight
+                            ? 'bg-[#08122c]/90 border-blue-400/60 shadow-[0_0_35px_rgba(59,130,246,0.25)] opacity-100 scale-100'
+                            : 'bg-white border-blue-400 shadow-xl opacity-100 scale-100'
+                          : isStarryNight
+                          ? 'bg-slate-900/30 border-white/5 opacity-40 hover:opacity-80 scale-[0.98]'
+                          : 'bg-slate-50 border-slate-200/60 opacity-45 hover:opacity-85 scale-[0.98]'
+                      }`}
+                    >
+                      {/* Mobile Thumbnail Card (Only visible on screens < lg) */}
+                      <div className="lg:hidden mb-5 rounded-2xl overflow-hidden relative h-36">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+                        <div className="absolute top-2.5 left-2.5">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border backdrop-blur-md ${item.badgeColor}`}>
+                            {item.badgeText}
+                          </span>
+                        </div>
+                        <div className="absolute bottom-2 left-3 right-3 text-white text-[11px] font-medium drop-shadow-md">
+                          {item.imgCaption}
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${item.badgeColor}`}>
+                            <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
+                            <span>{item.badgeText}</span>
+                          </div>
+                          <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full ${
                             isCurrent
-                              ? 'bg-blue-600 text-white'
+                              ? isStarryNight ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-800'
                               : isStarryNight ? 'bg-slate-800 text-slate-400' : 'bg-slate-200 text-slate-600'
                           }`}>
-                            {m.step}
+                            {item.code}
                           </span>
-                          <span className="text-xs font-semibold">{m.label}</span>
                         </div>
-                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                          isCurrent
-                            ? isStarryNight ? 'bg-blue-500/30 text-blue-200' : 'bg-blue-200 text-blue-800'
-                            : isStarryNight ? 'bg-slate-800 text-slate-400' : 'bg-slate-200 text-slate-600'
+
+                        <h3 className={`text-xl sm:text-2xl font-black tracking-tight leading-snug ${
+                          isStarryNight ? 'text-white' : 'text-slate-900'
                         }`}>
-                          {m.code}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                          {item.title}
+                        </h3>
 
-                {/* Statutory Guarantees Mini-Card */}
-                <div className={`p-4 rounded-2xl border space-y-2 text-xs ${
-                  isStarryNight ? 'bg-slate-950/60 border-white/10 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-700'
+                        <p className={`text-xs sm:text-sm leading-relaxed ${
+                          isStarryNight ? 'text-slate-300' : 'text-slate-600'
+                        }`}>
+                          {item.desc}
+                        </p>
+
+                        <div className={`space-y-2.5 pt-3 border-t ${isStarryNight ? 'border-white/10' : 'border-slate-100'}`}>
+                          {item.bullets.map((b, bIdx) => (
+                            <div key={bIdx} className="flex items-start gap-2.5 text-xs sm:text-[13px]">
+                              <Check size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                              <span className={isStarryNight ? 'text-slate-200' : 'text-slate-700'}>{b}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Statutory SLA Highlight Pill */}
+                        <div className={`p-3 rounded-2xl border flex items-center justify-between text-xs font-semibold ${
+                          isStarryNight ? 'bg-slate-950/70 border-white/10 text-slate-300' : 'bg-slate-100/80 border-slate-200 text-slate-800'
+                        }`}>
+                          <span className="flex items-center gap-2">
+                            <ShieldCheck size={15} className="text-emerald-400 shrink-0" />
+                            <span>Statutory Protection:</span>
+                          </span>
+                          <span className="font-mono text-emerald-400 font-bold">{item.highlight}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Right Column: Sticky Preview Card (Desktop lg+) */}
+              <div className="hidden lg:block lg:col-span-6 sticky top-28 self-start space-y-4">
+                <div className={`rounded-3xl p-6 sm:p-7 border space-y-5 relative overflow-hidden backdrop-blur-2xl transition-all duration-300 ${
+                  isStarryNight
+                    ? 'apple-glass-card specular-border-top shadow-[0_10px_50px_rgba(0,0,0,0.6)] border-white/15'
+                    : 'bg-white border-slate-200 shadow-xl'
                 }`}>
-                  <div className="font-bold flex items-center gap-1.5 text-emerald-400">
-                    <ShieldCheck size={14} />
-                    <span>Statutory Cooperative Pledges:</span>
+                  {/* Top Live Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <div className="flex items-center gap-2">
+                        <Compass size={14} className="text-blue-500 animate-spin-slow" />
+                        <span className={isStarryNight ? 'text-white' : 'text-slate-900'}>
+                          Civic Service Journey • Step 0{activeStickyStep} of 04
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-mono text-blue-400 font-semibold">
+                        {Math.round((activeStickyStep / 4) * 100)}% Complete
+                      </span>
+                    </div>
+                    <div className={`w-full h-1.5 rounded-full overflow-hidden ${isStarryNight ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 via-amber-500 to-emerald-500 transition-all duration-500 ease-out"
+                        style={{ width: `${(activeStickyStep / 4) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-1 text-[11px]">
-                    <div>• 94.5% direct labor credit with zero platform commission</div>
-                    <div>• Masked UIDAI identity preservation without plain-text storage</div>
-                    <div>• 4-Digit OTP gate for doorstep visit validation</div>
-                  </div>
-                </div>
 
-                <button
-                  onClick={onOpenCustomerBooking}
-                  className={`w-full py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all ${
-                    isStarryNight ? 'starry-btn-glossy' : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
-                >
-                  <span>Book Verified Service Now</span>
-                  <ArrowRight size={14} />
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Sticky Step Tracker (Visible on Screens < lg) */}
-            <div className="lg:hidden sticky top-16 z-30 mb-6 px-1">
-              <div className={`p-3.5 rounded-2xl border backdrop-blur-xl shadow-xl flex items-center justify-between transition-colors ${
-                isStarryNight ? 'bg-[#070d1e]/95 border-blue-500/30 text-white shadow-[0_0_25px_rgba(59,130,246,0.15)]' : 'bg-white/95 border-blue-200 text-slate-900 shadow-md'
-              }`}>
-                <div className="flex items-center gap-2.5">
-                  <span className="w-6 h-6 rounded-lg bg-blue-600 text-white text-[11px] font-bold flex items-center justify-center shadow-xs">
-                    0{activeStickyStep}
-                  </span>
-                  <span className="text-xs font-bold line-clamp-1">
-                    {activeStickyStep === 1 && 'Stage 1 • Verification & e-KYC'}
-                    {activeStickyStep === 2 && 'Stage 2 • Public Tariffs & Match'}
-                    {activeStickyStep === 3 && 'Stage 3 • Doorstep Arrival OTP'}
-                    {activeStickyStep === 4 && 'Stage 4 • Instant Settlement'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                  {[1, 2, 3, 4].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => {
-                        setActiveStickyStep(s);
-                        const el = document.getElementById(`step-card-${s}`);
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        activeStickyStep === s ? 'bg-blue-500 w-5' : isStarryNight ? 'bg-slate-700 w-2 hover:bg-slate-600' : 'bg-slate-300 w-2 hover:bg-slate-400'
-                      }`}
-                      aria-label={`Jump to stage ${s}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Sliding/Flipping Stage Card Column */}
-            <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
-              <div className="relative min-h-[520px] flex-1 perspective-1200 flex flex-col">
-                {/* Physical Stacking Card Layers Behind Active Card (ui-layouts stacking-card effect) */}
-                <div className={`absolute -bottom-2 inset-x-3 h-full rounded-3xl border transition-all duration-300 pointer-events-none -z-10 scale-[0.985] ${
-                  isStarryNight ? 'bg-slate-900/60 border-white/5 shadow-lg' : 'bg-slate-100 border-slate-200/80 shadow-xs'
-                }`} />
-                <div className={`absolute -bottom-4 inset-x-6 h-full rounded-3xl border transition-all duration-300 pointer-events-none -z-20 scale-[0.97] ${
-                  isStarryNight ? 'bg-slate-950/40 border-white/5 shadow-md' : 'bg-slate-200/50 border-slate-200/50 shadow-2xs'
-                }`} />
-
-                <AnimatePresence mode="wait">
-                  {(() => {
-                    const steps = [
-                      {
-                        step: 1,
-                        badgeText: 'Stage 1 • Verification',
-                        color: 'from-blue-600 to-indigo-600',
-                        badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-                        image: '/images/cooperative_community.jpg',
-                        imgCaption: 'Indore Ward 48 Society Registration & Democratic e-KYC',
-                        title: 'Artisan Verification & Democratic e-KYC',
-                        desc: 'Skilled tradesmen register with their local cooperative society in Indore. Identity is verified using Aadhaar e-KYC (digital verification with masked identity numbers for privacy) and a rigorous trade competency assessment.',
-                        bullets: [
-                          'Masked UIDAI validation — Zero citizen identity leakage',
-                          'Physical trade evaluation certified by Ward 48 Society officers',
-                          'Zero registration bidding or algorithmic lead fees',
-                        ],
-                        highlight: 'Verification SLA: < 48 hours in pilot wards',
-                      },
-                      {
-                        step: 2,
-                        badgeText: 'Stage 2 • Public Tariffs',
-                        color: 'from-amber-500 to-orange-500',
-                        badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-                        image: '/images/cooperative_command.jpg',
-                        imgCaption: 'Municipal Command Center & Proximity Dispatch Screen',
-                        title: 'Transparent Selection & Proximity Match',
-                        desc: 'Residents select from 146 benchmarked services at pre-published public rates under the MP Cooperative Societies Act. The platform matches the nearest certified artisan within a 5 km radius in Indore.',
-                        bullets: [
-                          '146 Standardized municipal rate tariffs with zero surge pricing',
-                          'Hyper-local dispatch within 5 km across Vijay Nagar & Palasia',
-                          'Transparent upfront quotation before booking confirmation',
-                        ],
-                        highlight: 'Average Proximity Arrival: 18–35 mins',
-                      },
-                      {
-                        step: 3,
-                        badgeText: 'Stage 3 • Doorstep Security',
-                        color: 'from-purple-600 to-pink-600',
-                        badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-                        image: '/images/doorstep_verified_visit.jpg',
-                        imgCaption: 'Resident 4-Digit Doorstep OTP Verification in Indore',
-                        title: 'Doorstep Arrival OTP & Parts Agreement',
-                        desc: 'The artisan arrives on schedule. A 4-digit Arrival OTP shared by the resident confirms the worker\'s identity before work begins. Any needed replacement materials are agreed upfront at actual receipt cost.',
-                        bullets: [
-                          '4-digit arrival passcode prevents impersonation or unverified entry',
-                          'Materials billed at actual invoice value with zero cooperative markup',
-                          'Resident authorization required for any scope extensions',
-                        ],
-                        highlight: 'Security Level: 2-Factor OTP authorization',
-                      },
-                      {
-                        step: 4,
-                        badgeText: 'Stage 4 • Instant Settlement',
-                        color: 'from-emerald-600 to-teal-600',
-                        badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-                        image: '/images/hero_artisan.jpg',
-                        imgCaption: 'Certified Member Artisan Receiving 94.5% Instant Credit',
-                        title: 'Fair Split Settlement & Social Welfare',
-                        desc: 'Upon completion confirmation, payment settles instantly: 94.5% straight to the artisan, 3.5% to cooperative administration, and 2.0% to the MP unorganized worker welfare fund.',
-                        bullets: [
-                          '94.5% direct labor payout credited directly to artisan via UPI',
-                          '2.0% accrues in MP unorganized worker health & accident fund',
-                          '3.5% maintains municipal digital infrastructure and arbitration',
-                        ],
-                        highlight: 'Settlement Speed: Instant UPI upon OTP validation',
-                      },
-                    ];
-                    const item = steps.find((s) => s.step === activeStickyStep) || steps[0];
-                    return (
-                      <motion.div
-                        key={item.step}
-                        initial={{ opacity: 0, x: 50, scale: 0.95, rotateY: 10 }}
-                        animate={{ opacity: 1, x: 0, scale: 1, rotateY: 0 }}
-                        exit={{ opacity: 0, x: -50, scale: 0.95, rotateY: -10 }}
-                        transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-                        className={`rounded-3xl p-6 sm:p-7 border space-y-4 relative overflow-hidden flex-1 flex flex-col justify-between ${
-                          isStarryNight
-                            ? 'apple-glass-card specular-border-top ui-shadow-glow hover:border-blue-400/50'
-                            : 'bg-white border-slate-200 ui-shadow-ambient'
-                        }`}
-                      >
-                        {/* Subtle top indicator bar */}
-                        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${item.color}`} />
-
-                        <div className="space-y-4">
-                          {/* Documentary Stage Photograph Banner */}
-                          <div className="h-32 sm:h-36 w-full rounded-2xl overflow-hidden relative group">
+                  {/* Pinned Stage Visual Card with AnimatePresence */}
+                  <AnimatePresence mode="wait">
+                    {(() => {
+                      const stickyMilestones = [
+                        {
+                          step: 1,
+                          badgeText: 'Stage 1 • Democratic e-KYC',
+                          code: 'Aadhaar e-KYC',
+                          color: 'from-blue-600 to-indigo-600',
+                          badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+                          image: '/images/cooperative_community.jpg',
+                          imgCaption: 'Indore Ward 48 Society Registration & Democratic e-KYC',
+                          title: 'Artisan Verification & Democratic e-KYC',
+                          desc: 'Skilled tradesmen register with their local cooperative society in Indore. Identity is verified using Aadhaar e-KYC with masked identity numbers for citizen privacy, accompanied by a rigorous physical trade competency assessment by elected ward elders.',
+                          highlight: 'Verification SLA: < 48 hours across Indore pilot wards',
+                          simulation: {
+                            title: 'UIDAI Masked ID Simulation',
+                            status: 'Identity Authenticated & Certified',
+                            statusColor: 'text-emerald-400',
+                            detail: 'Aadhaar: •••• •••• 9821 • Ward 48 Society Certified • Grade: Master Electrician',
+                          },
+                        },
+                        {
+                          step: 2,
+                          badgeText: 'Stage 2 • Public Tariffs',
+                          code: '146 Public Rates',
+                          color: 'from-amber-500 to-orange-500',
+                          badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                          image: '/images/cooperative_command.jpg',
+                          imgCaption: 'Municipal Command Center & Proximity Dispatch Screen',
+                          title: 'Transparent Selection & Proximity Match',
+                          desc: 'Residents select from 146 benchmarked services at pre-published public rates under the MP Cooperative Societies Act. The platform matches the nearest certified artisan within a 5 km radius in Indore with guaranteed transparent pricing.',
+                          highlight: 'Average Proximity Arrival: 18–35 mins across Indore',
+                          simulation: {
+                            title: 'Municipal Rate Benchmark Radar',
+                            status: 'Proximity Dispatch: 5 km Radius Active',
+                            statusColor: 'text-amber-400',
+                            detail: 'Fixed Tariff: ₹249 vs Commercial App: ₹499 + surge • Dispatch Radius: 5 km',
+                          },
+                        },
+                        {
+                          step: 3,
+                          badgeText: 'Stage 3 • Doorstep Security',
+                          code: '4-Digit Code',
+                          color: 'from-purple-600 to-pink-600',
+                          badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+                          image: '/images/doorstep_verified_visit.jpg',
+                          imgCaption: 'Resident 4-Digit Doorstep OTP Verification in Indore',
+                          title: 'Doorstep Arrival OTP & Parts Agreement',
+                          desc: 'The artisan arrives on schedule. A 4-digit Arrival OTP shared by the resident confirms the worker\'s identity before work begins. Any needed replacement materials are agreed upfront at actual receipt cost without marked-up parts.',
+                          highlight: 'Security Level: 2-Factor resident OTP verification',
+                          simulation: {
+                            title: 'Doorstep Arrival Security OTP',
+                            status: 'Passcode Verified • Authorized Entry Confirmed',
+                            statusColor: 'text-purple-400',
+                            detail: 'Security Passcode: [ 4 ] [ 8 ] [ 1 ] [ 9 ] • Resident Authorization Verified',
+                          },
+                        },
+                        {
+                          step: 4,
+                          badgeText: 'Stage 4 • Instant Settlement',
+                          code: '94.5% Direct UPI',
+                          color: 'from-emerald-600 to-teal-600',
+                          badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+                          image: '/images/hero_artisan.jpg',
+                          imgCaption: 'Certified Member Artisan Receiving 94.5% Instant Credit',
+                          title: 'Fair Split Settlement & Social Welfare',
+                          desc: 'Upon job completion confirmation, payment settles instantly: 94.5% straight to the artisan\'s linked bank account via UPI, 3.5% to cooperative administration, and 2.0% to the MP unorganized worker welfare fund.',
+                          highlight: 'Settlement Speed: Instant UPI upon OTP validation',
+                          simulation: {
+                            title: 'Direct Split Payout Ledger',
+                            status: 'Direct UPI Settled • Zero Middleman Cut',
+                            statusColor: 'text-emerald-400',
+                            detail: '₹945.00 Artisan (94.5%) • ₹20.00 Welfare Fund (2.0%) • ₹35.00 Samiti (3.5%)',
+                          },
+                        },
+                      ];
+                      const cur = stickyMilestones.find((s) => s.step === activeStickyStep) || stickyMilestones[0];
+                      return (
+                        <motion.div
+                          key={cur.step}
+                          initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.96, y: -12 }}
+                          transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                          className="space-y-4"
+                        >
+                          {/* Documentary Stage Photograph */}
+                          <div className="h-44 sm:h-52 w-full rounded-2xl overflow-hidden relative group">
                             <img
-                              src={item.image}
-                              alt={item.title}
+                              src={cur.image}
+                              alt={cur.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
                             <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border backdrop-blur-md ${item.badgeColor}`}>
-                                {item.badgeText}
+                              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border backdrop-blur-md ${cur.badgeColor}`}>
+                                {cur.badgeText}
                               </span>
-                              <span className={`w-8 h-8 rounded-xl bg-gradient-to-br ${item.color} text-white font-black text-xs flex items-center justify-center shadow-md backdrop-blur-md`}>
-                                0{item.step}
+                              <span className={`w-8 h-8 rounded-xl bg-gradient-to-br ${cur.color} text-white font-black text-xs flex items-center justify-center shadow-md backdrop-blur-md`}>
+                                0{cur.step}
                               </span>
                             </div>
                             <div className="absolute bottom-2.5 left-3 right-3 text-white text-xs font-semibold drop-shadow-md">
-                              {item.imgCaption}
+                              {cur.imgCaption}
                             </div>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <h3 className={`text-lg sm:text-xl font-extrabold tracking-tight ${isStarryNight ? 'text-white' : 'text-slate-900'}`}>
-                              {item.title}
-                            </h3>
-                            <p className={`text-xs leading-relaxed ${isStarryNight ? 'text-slate-300' : 'text-slate-600'}`}>
-                              {item.desc}
+                          {/* Live Simulation Display Card */}
+                          <div className={`p-4 rounded-2xl border space-y-2 transition-colors ${
+                            isStarryNight ? 'bg-slate-950/70 border-white/10' : 'bg-slate-50 border-slate-200'
+                          }`}>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-bold flex items-center gap-1.5 text-blue-400">
+                                <Sparkles size={13} />
+                                <span>{cur.simulation.title}</span>
+                              </span>
+                              <span className={`text-[11px] font-bold ${cur.simulation.statusColor}`}>
+                                {cur.simulation.status}
+                              </span>
+                            </div>
+                            <div className={`text-xs font-mono font-medium p-2.5 rounded-xl border ${
+                              isStarryNight ? 'bg-slate-900/90 border-white/5 text-slate-200' : 'bg-white border-slate-200 text-slate-800'
+                            }`}>
+                              {cur.simulation.detail}
+                            </div>
+                          </div>
+
+                          {/* Statutory Guarantees Mini-Card */}
+                          <div className={`p-3.5 rounded-2xl border space-y-1.5 text-xs ${
+                            isStarryNight ? 'bg-slate-900/50 border-white/10 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+                          }`}>
+                            <div className="font-bold flex items-center gap-1.5 text-emerald-400 text-xs">
+                              <ShieldCheck size={14} />
+                              <span>Statutory MP Cooperative Act Guarantee:</span>
+                            </div>
+                            <p className="text-[11px] leading-relaxed text-slate-400">
+                              {cur.highlight} • Fully audited under the Madhya Pradesh Cooperative Societies Act, 1960.
                             </p>
                           </div>
+                        </motion.div>
+                      );
+                    })()}
+                  </AnimatePresence>
 
-                          {/* Bullet checklist */}
-                          <div className={`space-y-2 pt-2 border-t ${isStarryNight ? 'border-white/10' : 'border-slate-100'}`}>
-                            {item.bullets.map((b, bIdx) => (
-                              <div key={bIdx} className="flex items-start gap-2.5 text-xs">
-                                <Check size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                                <span className={isStarryNight ? 'text-slate-200' : 'text-slate-700'}>{b}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                  {/* Stage Switcher Buttons & CTA */}
+                  <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-white/10">
+                    <div className="grid grid-cols-4 gap-2">
+                      {[1, 2, 3, 4].map((s) => {
+                        const isCurrent = activeStickyStep === s;
+                        return (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => {
+                              setActiveStickyStep(s);
+                              const el = document.getElementById(`sticky-step-${s}`);
+                              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }}
+                            className={`py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center gap-0.5 border ${
+                              isCurrent
+                                ? isStarryNight
+                                  ? 'bg-blue-600 text-white border-blue-400 shadow-sm'
+                                  : 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                : isStarryNight
+                                ? 'bg-slate-900/60 text-slate-400 hover:text-white border-white/5 hover:bg-slate-800'
+                                : 'bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-200'
+                            }`}
+                          >
+                            <span>Stage 0{s}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
 
-                        {/* Bottom Highlight & Step Navigation */}
-                        <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-white/10">
-                          <div className={`p-3 rounded-2xl border flex items-center justify-between text-xs font-semibold ${
-                            isStarryNight ? 'bg-slate-900/60 border-white/10 text-blue-300' : 'bg-slate-50 border-slate-200 text-blue-900'
-                          }`}>
-                            <span className="flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                              <span>Key Statutory Guarantee:</span>
-                            </span>
-                            <span className="font-mono text-emerald-400 font-bold">{item.highlight}</span>
-                          </div>
-
-                          <div className="flex items-center justify-between pt-1">
-                            <button
-                              onClick={() => setActiveStickyStep((prev) => (prev > 1 ? prev - 1 : 4))}
-                              className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors ${
-                                isStarryNight ? 'bg-slate-900/80 border-white/10 text-slate-300 hover:text-white' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
-                              }`}
-                            >
-                              <ChevronLeft size={14} />
-                              <span>Previous Stage</span>
-                            </button>
-                            <div className="flex items-center gap-1.5">
-                              {[1, 2, 3, 4].map((s) => (
-                                <button
-                                  key={s}
-                                  onClick={() => setActiveStickyStep(s)}
-                                  className={`h-2 rounded-full transition-all cursor-pointer ${
-                                    activeStickyStep === s ? 'w-6 bg-blue-500' : 'w-2 bg-slate-400/40 hover:bg-slate-400'
-                                  }`}
-                                  aria-label={`Jump to stage ${s}`}
-                                />
-                              ))}
-                            </div>
-                            <button
-                              onClick={() => setActiveStickyStep((prev) => (prev < 4 ? prev + 1 : 1))}
-                              className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors ${
-                                isStarryNight ? 'bg-slate-900/80 border-white/10 text-slate-300 hover:text-white' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
-                              }`}
-                            >
-                              <span>Next Stage</span>
-                              <ChevronRight size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })()}
-                </AnimatePresence>
+                    <button
+                      type="button"
+                      onClick={onOpenCustomerBooking}
+                      className={`w-full py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all ${
+                        isStarryNight ? 'starry-btn-glossy' : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
+                    >
+                      <span>Book Verified Service Now</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
