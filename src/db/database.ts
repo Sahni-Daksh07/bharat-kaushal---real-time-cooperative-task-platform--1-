@@ -123,11 +123,10 @@ export class BharatKaushalDatabase {
       if (isSupabaseConfigured && supabaseAdmin) {
         console.log('[DB] Connecting to Supabase Cloud Database (gndkbtssabnmknkendpz)...');
         try {
-          const [srvRes, wrkRes, socRes, bkgRes] = await Promise.all([
-            supabaseAdmin.from('services').select('*').limit(200),
-            supabaseAdmin.from('workers').select('*').limit(50),
-            supabaseAdmin.from('societies').select('*').limit(20),
-            supabaseAdmin.from('bookings').select('*').limit(50),
+          const [srvRes, wrkRes, socRes] = await Promise.all([
+            Promise.resolve(supabaseAdmin.from('services').select('*').limit(200)),
+            Promise.resolve(supabaseAdmin.from('workers').select('*').limit(50)),
+            Promise.resolve(supabaseAdmin.from('societies').select('*').limit(20)),
           ]);
 
           if (srvRes.data && srvRes.data.length > 0) {
@@ -181,16 +180,16 @@ export class BharatKaushalDatabase {
 
     // Async sync to Supabase
     if (supabaseAdmin) {
-      supabaseAdmin
-        .from('workers')
-        .update({
-          availability: updates.availability,
-          rating: updates.rating,
-          trust_score: updates.trustScore,
-        })
-        .eq('id', id)
-        .then(() => {})
-        .catch(() => {});
+      Promise.resolve(
+        supabaseAdmin
+          .from('workers')
+          .update({
+            availability: updates.availability,
+            rating: updates.rating,
+            trust_score: updates.trustScore,
+          })
+          .eq('id', id)
+      ).catch(() => {});
     }
 
     return this.state.workers[idx];
@@ -247,27 +246,31 @@ export class BharatKaushalDatabase {
 
     // Async sync to Supabase
     if (supabaseAdmin) {
-      supabaseAdmin
-        .from('bookings')
-        .insert([
+      const grossAmount = booking.pricing?.grossAmount ?? booking.pricing?.netPayable ?? 250;
+      const workerShare = booking.pricing?.workerShare ?? 236.25;
+      const societyShare = booking.pricing?.societyShare ?? 8.75;
+      const welfareShare = booking.pricing?.welfareShare ?? 5.0;
+      const netPayable = booking.pricing?.netPayable ?? grossAmount;
+
+      Promise.resolve(
+        supabaseAdmin.from('bookings').insert([
           {
             id: booking.id,
             customer_id: booking.customerId,
             worker_id: booking.workerId || null,
             service_id: booking.serviceId,
             status: booking.status,
-            gross_amount: booking.pricing?.totalPrice || 250,
-            worker_share: booking.pricing?.workerShare || 236.25,
-            society_share: booking.pricing?.societyShare || 8.75,
-            welfare_share: booking.pricing?.welfareLevy || 5.0,
-            net_payable: booking.pricing?.totalPrice || 250,
+            gross_amount: grossAmount,
+            worker_share: workerShare,
+            society_share: societyShare,
+            welfare_share: welfareShare,
+            net_payable: netPayable,
             arrival_otp: booking.arrivalOtp,
             completion_otp: booking.completionOtp,
-            scope_details: booking.scopeDetails?.customNotes || '',
+            scope_details: (booking as any).scopeDetails?.additionalNotes || '',
           },
         ])
-        .then(() => {})
-        .catch(() => {});
+      ).catch(() => {});
     }
 
     return booking;
@@ -281,16 +284,16 @@ export class BharatKaushalDatabase {
 
     // Async sync to Supabase
     if (supabaseAdmin) {
-      supabaseAdmin
-        .from('bookings')
-        .update({
-          status: updates.status,
-          completed_at: updates.status === 'COMPLETED' ? new Date().toISOString() : undefined,
-          paid_at: updates.paymentStatus === 'PAID' ? new Date().toISOString() : undefined,
-        })
-        .eq('id', id)
-        .then(() => {})
-        .catch(() => {});
+      Promise.resolve(
+        supabaseAdmin
+          .from('bookings')
+          .update({
+            status: updates.status,
+            completed_at: updates.status === 'COMPLETED' ? new Date().toISOString() : undefined,
+            paid_at: updates.paymentStatus === 'PAID' ? new Date().toISOString() : undefined,
+          })
+          .eq('id', id)
+      ).catch(() => {});
     }
 
     return this.state.bookings[idx];
@@ -316,9 +319,8 @@ export class BharatKaushalDatabase {
 
     // Async sync to Supabase
     if (supabaseAdmin) {
-      supabaseAdmin
-        .from('financial_ledger')
-        .insert([
+      Promise.resolve(
+        supabaseAdmin.from('financial_ledger').insert([
           {
             id: entry.id,
             booking_id: entry.bookingId,
@@ -330,8 +332,7 @@ export class BharatKaushalDatabase {
             status: entry.status,
           },
         ])
-        .then(() => {})
-        .catch(() => {});
+      ).catch(() => {});
     }
 
     return entry;
