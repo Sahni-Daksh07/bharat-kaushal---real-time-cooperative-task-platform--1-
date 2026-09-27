@@ -118,7 +118,7 @@ async function main() {
 
   console.log('\n--- Provisioning Demo Role Accounts in Supabase Auth ---');
   for (const d of demoUsers) {
-    const existing = usersData?.users.find((u) => u.email === d.email || u.phone === d.phone);
+    const existing = (usersData?.users as any[])?.find((u: any) => u.email === d.email || u.phone === d.phone);
     if (existing) {
       console.log(`ℹ️ User already exists for ${d.email} (ID: ${existing.id}), updating metadata...`);
       const { error: updErr } = await supabase.auth.admin.updateUserById(existing.id, {
